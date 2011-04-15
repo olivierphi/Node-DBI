@@ -2,7 +2,7 @@
 
 Node-DBI is a SQL database abstraction layer library, strongly inspired by the PHP Zend Framework [Zend_Db API](http://framework.zend.com/manual/en/zend.db.html).
 It provides unified functions to work with multiple database engines, through Adapters classes.
-At this time, supported engines are [mysql](https://github.com/felixge/node-mysql), [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient) and [sqlite3](adapter--sqlite3.js), but other engines adapters should be easy to add - well, this is the goal of this library , after all :-)
+At this time, supported engines are [mysql](https://github.com/felixge/node-mysql), [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient) and [sqlite3](https://github.com/developmentseed/node-sqlite3), but other engines adapters should be easy to add - well, this is the goal of this library , after all :-)
 
 It provides __DBWrapper__ and __DBSelect__ Javascript classes, described later on this document.
 
@@ -138,7 +138,7 @@ And of course, these database engines, which makes the really hard work in Node-
 
  * [mysql](https://github.com/felixge/node-mysql)
  * [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient)
- * [sqlite3](adapter--sqlite3.js)
+ * [sqlite3](https://github.com/developmentseed/node-sqlite3)
  
 Any SQL database engine should be added, with only a quick Adapter writing. See the existing Adapters or contact me for help, if you want to add one !
   
