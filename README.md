@@ -128,11 +128,14 @@ This is a first version ; all my unit tests run successfully, but it may have bu
 ## Dependencies
 
 Thanks to these great modules, which Node-DBI relies on :
+
  * [async](https://github.com/caolan/async)
  * [underscore](https://github.com/grayrest/underscore)
  * [vows](https://github.com/cloudhead/vows) for the unit tests
- 
+
+
 And of course, these database engines, which makes the really hard work in Node-DBI :
+
  * [mysql](https://github.com/felixge/node-mysql)
  * [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient)
  * [sqlite3](adapter--sqlite3.js)
