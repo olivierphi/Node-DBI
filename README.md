@@ -8,8 +8,8 @@ It provides __DBWrapper__ and __DBSelect__ Javascript classes, described later o
 
 ## Some Examples
 
-Node-DBI is not only a abstraction layer which allows you to change your DB engine during a project wihout having to rewrite anything.
-Its __fetch*__, __insert__, __update__, __remove__ methods, and its __DBSelect__ component, can really help you to code your database communication more quickly.
+Node-DBI is not only an abstraction layer which allows you to change your DB engine during a project  if you have to, wihout having to rewrite anything.
+Its __fetch*__, __insert__, __update__, __remove__ methods, and its __DBSelect__ component can really help you to write your database related code more quickly.
 
 See how :
 
@@ -122,7 +122,9 @@ Alternatively, you can install using Node Package Manager (npm):
 
     npm install node-dbi
     
-    
+This is a first version ; all my unit tests run successfully, but it may have bugs. Tell me if you find one ! :-)
+
+
 ## Dependencies
 
 Thanks to these great modules, which Node-DBI relies on :
@@ -135,5 +137,5 @@ And of course, these database engines, which makes the really hard work in Node-
  * [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient)
  * [sqlite3](adapter--sqlite3.js)
  
-Any SQL database engine should be added, with only a quick Adapter writing. See the existing Adapters or contact me for help, if you want to add one ! :-)
+Any SQL database engine should be added, with only a quick Adapter writing. See the existing Adapters or contact me for help, if you want to add one !
   
