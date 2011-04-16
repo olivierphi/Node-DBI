@@ -12,7 +12,8 @@ Node-DBI is primarily an abstraction layer library ; it allows you to change you
 
 But Its high-level functions __fetch*__, __insert__, __update__, __remove__, and its __DBSelect__ component, can really help you to write your database related code more quickly - the efficiency of these components is real, since Node-DBI imitates the API of a great PHP database abstraction layer, [Zend_Db](http://framework.zend.com/manual/en/zend.db.html), which is used by thousands of Web developers for many years.
 
-See how it works: (this [Gist](https://gist.github.com/923149) shos it with syntax highlighting)
+The example below demonstates the Node-DBI usage:
+(see this [Gist](https://gist.github.com/923149) for the same code with syntax highlighting)
 
     var DBWrapper = require('node-dbi').DBWrapper; 
     var dbConnectionConfig = { host: 'localhost', user: 'test', password: 'test', database: 'test' };
