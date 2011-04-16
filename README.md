@@ -9,9 +9,10 @@ It provides __DBWrapper__ and __DBSelect__ Javascript classes, described later o
 ## Usage
 
 Node-DBI is primarily an abstraction layer library ; it allows you to change your DB engine during a project if you have to, wihout having to rewrite anything, and you can use the same database API on a MySQL-based project than on a SQLite-based one (Postgres support is planned, too).
-But Its high-level functions __fetch*__, __insert__, __update__, __remove__, and its __DBSelect__ component, can really help you to write your database related code more quickly - Node-DBI imitates the API of a great PHP database abstraction layer, [Zend_Db](http://framework.zend.com/manual/en/zend.db.html), which is used by thousands of Web developers for many years.
 
-See how it works:
+But Its high-level functions __fetch*__, __insert__, __update__, __remove__, and its __DBSelect__ component, can really help you to write your database related code more quickly - the efficiency of these components is real, since Node-DBI imitates the API of a great PHP database abstraction layer, [Zend_Db](http://framework.zend.com/manual/en/zend.db.html), which is used by thousands of Web developers for many years.
+
+See how it works: (this [Gist](https://gist.github.com/923149) shos it with syntax highlighting)
 
     var DBWrapper = require('node-dbi').DBWrapper; 
     var dbConnectionConfig = { host: 'localhost', user: 'test', password: 'test', database: 'test' };
@@ -58,12 +59,12 @@ See how it works:
     
     // ** update  ( here the fist name is used as a raw String, but the last name is safely escaped ) 
     var JohnDataUpdate = { rank: '1' };
-    dbWrapper.update('user', JohnDataUpdate , [ 'first_name=\'John\'', ['last_name=?', 'Foo] ], function(err) {
+    dbWrapper.update('user', JohnDataUpdate , [ 'first_name=\'John\'', ['last_name=?', 'Foo'] ], function(err) {
       // John is now our best user. Congratulations, John !
     } );
     
     // ** remove  ( this time, both values are safely escaped ) 
-    dbWrapper.remove('user', [ ['first_name LIKE ?', '%John%'], ['last_name=?', 'Foo] ] , function(err) {
+    dbWrapper.remove('user', [ ['first_name LIKE ?', '%John%'], ['last_name=?', 'Foo'] ] , function(err) {
       // John left at the height of its glory.
     } );
     
