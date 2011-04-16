@@ -2,22 +2,22 @@
 
 Node-DBI is a SQL database abstraction layer library, strongly inspired by the PHP Zend Framework [Zend_Db API](http://framework.zend.com/manual/en/zend.db.html).
 It provides unified functions to work with multiple database engines, through Adapters classes.
-At this time, supported engines are [mysql](https://github.com/felixge/node-mysql), [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient) and [sqlite3](https://github.com/developmentseed/node-sqlite3), but other engines adapters should be easy to add - well, this is the goal of this library , after all :-)
+At this time, supported engines are [mysql](https://github.com/felixge/node-mysql), [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient) and [sqlite3](https://github.com/developmentseed/node-sqlite3), but other engines adapters should be easy to add - well, this is the main goal of this library , after all :-)
 
 It provides __DBWrapper__ and __DBSelect__ Javascript classes, described later on this document.
 
-## Some Examples
+## Usage
 
-Node-DBI is not only an abstraction layer which allows you to change your DB engine during a project  if you have to, wihout having to rewrite anything.
-Its __fetch*__, __insert__, __update__, __remove__ methods, and its __DBSelect__ component can really help you to write your database related code more quickly.
+Node-DBI is primarily an abstraction layer library ; it allows you to change your DB engine during a project if you have to, wihout having to rewrite anything, and you can use the same database API on a MySQL-based project than on a SQLite-based one (Postgres support is planned, too).
+But Its high-level functions __fetch*__, __insert__, __update__, __remove__, and its __DBSelect__ component, can really help you to write your database related code more quickly - Node-DBI imitates the API of a great PHP database abstraction layer, [Zend_Db](http://framework.zend.com/manual/en/zend.db.html), which is used by thousands of Web developers for many years.
 
-See how :
+See how it works:
 
     var DBWrapper = require('node-dbi').DBWrapper; 
     var dbConnectionConfig = { host: 'localhost', user: 'test', password: 'test', database: 'test' };
     
-    // Replace [engine adapter name] with "mysql", "mysql-libmysqlclient" or "sqlite3" on the following line :
-    dbWrapper = new DBWrapper( '[engine adapter name]', dbConnectionConfig );
+    // Replace the adapter name with "mysql", "mysql-libmysqlclient" or "sqlite3" on the following line :
+    dbWrapper = new DBWrapper( '[DB engine adapter name]', dbConnectionConfig );
     
     
     // ** fetchAll
@@ -34,8 +34,8 @@ See how :
       // this time, "result" is a single hash (the first returned row)
     } );
     
-    // ** fetchCol
-    dbWrapper.fetchCol('SELECT first_name FROM user ORDER BY fist_name', [], function(err, result) {
+    // ** fetchCol  (if you dont' have values to escape, the 2nd param can be an empty Array or "null")
+    dbWrapper.fetchCol('SELECT first_name FROM user ORDER BY fist_name', null, function(err, result) {
       if( ! err )
         console.dir(result);
       // "result" is an Array with all the names of our users, sorted alphabetically
@@ -49,14 +49,16 @@ See how :
     } );
     
     // ** insert
-    dbWrapper.insert('user', { first_name: 'John', last_name: 'Foo', rank: '3' } , function(err) {
+    var JohnData = { first_name: 'John', last_name: 'Foo', rank: '3' };
+    dbWrapper.insert('user', JohnData , function(err) {
       if( ! err )
         console.log( 'John ID : ' + dbWrapper.getLastInsertId() );
       // John has been inserted in our table, with its properties safely escaped
     } );
     
     // ** update  ( here the fist name is used as a raw String, but the last name is safely escaped ) 
-    dbWrapper.update('user', { rank: '1' } , [ 'first_name=\'John\'', ['last_name=?', 'Foo] ], function(err) {
+    var JohnDataUpdate = { rank: '1' };
+    dbWrapper.update('user', JohnDataUpdate , [ 'first_name=\'John\'', ['last_name=?', 'Foo] ], function(err) {
       // John is now our best user. Congratulations, John !
     } );
     
@@ -76,10 +78,10 @@ See how :
       .limit( 10 );
     console.log( select.assemble() );
       
-    // You can use you DBSelect with a "fetch" method...
+    // You can retrieve the data of this DBSelect with a "fetch" method...
     dbWrapper.fetchAll( select, function(err) {} );
     
-    // ..or you can trigger a "fetch" method directly  on it ! 
+    // ..or you can trigger a "fetch" method directly on it ! 
     select.fetchAll( function(err) {} );
     
     
@@ -101,18 +103,20 @@ The __DBWrapper__ Javascript class, which is the only visible part on top on the
  * __isConnected()__ : tells us if the DbWrapper is connected to its database. 
  * __getSelect()__ : returns a DBSelect
 
-All these methods returns the sames results, whatever the chosen database engine is.  
+All these methods returns exactly the sames results, whatever the chosen database engine is.  
 
 
 ## DBSelect Class
 
-Furthermore, Node-DBI provides a DBSelect class which allows easy and readable SQL "SELECT" Strings building. It provides the following methods :
+Furthermore, Node-DBI provides a DBSelect class which allows easy and readable SQL "SELECT" Strings building. At the moment, it provides the following methods :
 
  * __from( tableName, fieldsArray )__ : adds a table in the FROM clause, and adds its fields to the SELECT
  * __where( whereStr, value )__ : adds a WHERE clause ; if "value" is not null, all the "?" occurences of the "whereStr" will be replaced with the safely escaped value
  * __limit( nbResults, startIndex )__ : set the LIMIT clause ; "startIndex" param is optionnal
  * __order( fieldName, direction )__ : adds a ORDER BY clause ; if "direction" is not set, it will be set to "ASC"
  * __assemble()__ : converts ou DBSelect object to an SQL SELECT string.
+
+"join()" and "groupBy()" will be added soon.
 
 
 ## Install
@@ -140,5 +144,10 @@ And of course, these database engines, which makes the really hard work in Node-
  * [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient)
  * [sqlite3](https://github.com/developmentseed/node-sqlite3)
  
-Any SQL database engine should be added, with only a quick Adapter writing. See the existing Adapters or contact me for help, if you want to add one !
+Any SQL database engine can theorically be added, with only a quick Adapter writing. See the existing Adapters or contact me for help, if you want to add one !
+
+## License
+
+Node-DBI is licensed under the MIT license.
+
   
