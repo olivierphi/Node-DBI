@@ -2,20 +2,24 @@
 
 Node-DBI is a SQL database abstraction layer library, strongly inspired by the PHP Zend Framework [Zend_Db API](http://framework.zend.com/manual/en/zend.db.html).
 It provides unified functions to work with multiple database engines, through Adapters classes.
-At this time, supported engines are [mysql](https://github.com/felixge/node-mysql), [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient) and [sqlite3](https://github.com/developmentseed/node-sqlite3), but other engines adapters should be easy to add - well, this is the main goal of this library , after all :-)
+At this time, supported engines are [mysql](https://github.com/felixge/node-mysql), [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient) and [sqlite3](https://github.com/developmentseed/node-sqlite3), but other engines adapters should be easy to add.
 
 It provides __DBWrapper__ and __DBSelect__ Javascript classes, described later on this document.
 
 ## Usage
 
-Node-DBI is primarily an abstraction layer library ; it allows you to change your DB engine during a project if you have to, wihout having to rewrite anything, and you can use the same database API on a MySQL-based project than on a SQLite-based one (Postgres support is planned, too).
+Node-DBI is primarily an abstraction layer library ; it allows you to have a "database-agnostic" application, with a single API for multiple databases engines.
 
-But Its high-level functions __fetch*__, __insert__, __update__, __remove__, and its __DBSelect__ component, can really help you to write your database related code more quickly - the efficiency of these components is real, since Node-DBI imitates the API of a great PHP database abstraction layer, [Zend_Db](http://framework.zend.com/manual/en/zend.db.html), which is used by thousands of Web developers for many years.
+It provides high-level functions to fecth, insert, update and remove data from the database.
+It is also bundled with a __DBSelect__ component, used to build SQL queries in a more readable, more flexible and more secure (thanks to is params escaping policy) way than long SQL strings.
+
+Node-DBI imitates the API of the great Open Source PHP database abstraction layer of the [Zend Framework](http://framework.zend.com/), [Zend_Db](http://framework.zend.com/manual/en/zend.db.html), used by thousands of Web developers for several years.
 
 The example below demonstates the Node-DBI usage:
-(see this [Gist](https://gist.github.com/923149) for the same code with syntax highlighting)
+(you can also look this [Gist](https://gist.github.com/923149) for the same code with syntax highlighting)
 
     var DBWrapper = require('node-dbi').DBWrapper; 
+    var DBExpr = require('node-dbi').DBExpr; 
     var dbConnectionConfig = { host: 'localhost', user: 'test', password: 'test', database: 'test' };
     
     // Replace the adapter name with "mysql", "mysql-libmysqlclient" or "sqlite3" on the following line :
@@ -50,8 +54,8 @@ The example below demonstates the Node-DBI usage:
       // "result" is the first_name of our best user
     } );
     
-    // ** insert
-    var JohnData = { first_name: 'John', last_name: 'Foo', rank: '3' };
+    // ** insert   (DBExpr force somes values to be used "as is", without safe escape : it is useful for SQL functions like "NOW()", "COUNT(*)", "SUM(rank)"... )
+    var JohnData = { first_name: 'John', last_name: 'Foo', rank: '3', date_created: new DBExpr('NOW()') };
     dbWrapper.insert('user', JohnData , function(err) {
       if( ! err )
         console.log( 'John ID : ' + dbWrapper.getLastInsertId() );
@@ -78,7 +82,11 @@ The example below demonstates the Node-DBI usage:
       .where( 'last_name LIKE ?', '%Foo%' )
       .order( 'last_name' )
       .limit( 10 );
-    console.log( select.assemble() );
+      
+    if( req.params.onlyVerifiedAccounts )
+       select.where('verified=1');
+       
+    console.log( select.assemble() );//outputs the SQL query for debug purpose 
       
     // You can retrieve the data of this DBSelect with a "fetch" method...
     dbWrapper.fetchAll( select, function(err) {} );
@@ -87,7 +95,7 @@ The example below demonstates the Node-DBI usage:
     select.fetchAll( function(err) {} );
     
     
-You can look the unit tests in the "test/" folder to see more examples.
+See the unit tests in the "test/" folder for more examples.
            
 
 ## DBWrapper Class

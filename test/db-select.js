@@ -20,7 +20,8 @@ var testedAdapterNames = [
 ];
 
 
-
+var DBWrapper = nodeDBI.DBWrapper;
+var DBExpr = nodeDBI.DBExpr;
 
 /**
  * @see http://vowsjs.org/
@@ -28,7 +29,7 @@ var testedAdapterNames = [
 var adapterTestSuite = function( adapterName, callback )
 {
   
-  var dbWrapper = new nodeDBI.DBWrapper( adapterName, config );
+  var dbWrapper = new DBWrapper( adapterName, config );
 
   var tableName = 'test_' + ( 100 + Math.round( Math.random() * 5000 )  );
   
@@ -103,11 +104,11 @@ var adapterTestSuite = function( adapterName, callback )
       
     }, 
     
-    'custom fields in a basic SELECT with 3 tables': {
+    'custom fields in a basic SELECT with 3 tables - with the use of DBExpr for non-escaped values': {
       topic: function()
       {
         return dbWrapper.getSelect()
-          .from('user', 'COUNT(`user`.*)')
+          .from('user', new DBExpr('COUNT(`user`.*)') )
           .from('details', ['creation_date', 'last_update_date'] )
           .from('facebook_info', ['facebook_id', 'nb_friends']);
       },
@@ -179,6 +180,21 @@ var adapterTestSuite = function( adapterName, callback )
       'assembled Select is OK': function( select )
       {
         assert.equal( select.assemble(), 'enabled=1 AND id=10 AND first_name=\'Dr.\'' );
+      }
+      
+    },
+    
+    'DBExpr usage : non-escaped clauses': {
+      topic: function()
+      {
+        return dbWrapper.getSelect()
+        .from('user')
+          .where('DAY(date_created)=?', new DBExpr('DAY( NOW() )') )
+      },
+      
+      'assembled Select is OK': function( select )
+      {
+        assert.equal( select.assemble(), 'SELECT `user`.* FROM `user` WHERE DAY(date_created)=DAY( NOW() )' );
       }
       
     },

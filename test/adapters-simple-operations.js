@@ -68,6 +68,21 @@ var getTableCreationSql = function( adapterName, tableName )
          );  \
        '.replace('{tableName}', tableName ); 
 
+    case 'pg':
+      return '\
+        CREATE TABLE   \
+        {tableName} \
+        (  \
+          id SERIAL PRIMARY KEY ,  \
+          first_name VARCHAR(100) NOT NULL,  \
+          last_name VARCHAR(100) NOT NULL,   \
+          nickname VARCHAR(20) ,   \
+          birth_date DATE NOT NULL,  \
+          num_children INT NOT NULL ,  \
+          enabled INT NOT NULL \
+        );  \
+      '.replace('{tableName}', tableName ); 
+      
     default:
       throw new Error('Unknown Adapter "'+adapterName+'" !');
        
@@ -105,13 +120,17 @@ var secondInsertedUser = {
 };
 
 
+var DBWrapper = nodeDBI.DBWrapper;
+var DBExpr = nodeDBI.DBExpr;
+
+
 /**
  * @see http://vowsjs.org/
  */
 var adapterTestSuite = function( adapterName, callback )
 {
   
-  var dbWrapper = new nodeDBI.DBWrapper( adapterName, config );
+  var dbWrapper = new DBWrapper( adapterName, config );
   dbWrapper.connect();
   
   var tableName = 'test_' + ( 100 + Math.round( Math.random() * 5000 )  );
@@ -343,7 +362,7 @@ var adapterTestSuite = function( adapterName, callback )
     'DBSelect test, use with a DBWrapper fetch method': {
       topic: function()
       {
-        var select = dbWrapper.getSelect().from(tableName, 'COUNT(*)').where('id=?', 2);
+        var select = dbWrapper.getSelect().from(tableName, new DBExpr('COUNT(*)') ).where('id=?', 2);
         dbWrapper.fetchOne( select, null, this.callback ); 
       },
       
