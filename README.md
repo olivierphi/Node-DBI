@@ -124,9 +124,10 @@ Furthermore, Node-DBI provides a DBSelect class which allows easy and readable S
  * __where( whereStr, value )__ : adds a WHERE clause ; if "value" is not null, all the "?" occurences of the "whereStr" will be replaced with the safely escaped value
  * __limit( nbResults, startIndex )__ : set the LIMIT clause ; "startIndex" param is optionnal
  * __order( fieldName, direction )__ : adds a ORDER BY clause ; if "direction" is not set, it will be set to "ASC"
+ * __join( tableName, joinStr, fieldsArray, joinType )__ : adds a JOIN clause ; if "joinType" is not set, it will be set to "INNER"
+ * __distinct()__ : adds a DISTINCT() to the query
+ * __groupyBy( fieldName )__ : adds a GROUPY BY clause
  * __assemble()__ : converts ou DBSelect object to an SQL SELECT string.
-
-"join()" and "groupBy()" will be added soon.
 
 
 ## Install
