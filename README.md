@@ -93,6 +93,10 @@ The example below demonstates the Node-DBI usage:
     
     // ..or you can trigger a "fetch" method directly on it ! 
     select.fetchAll( function(err) {} );
+
+
+    // When you have finished working with the database, you can close the connection
+    dbWrapper.close( function(err) {console.log('Connection closed !');} );
     
     
 See the unit tests in the "test/" folder for more examples.

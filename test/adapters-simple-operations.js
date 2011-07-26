@@ -22,7 +22,7 @@ var vows = require('vows')
   , async = require('async')
   , _ = require('underscore')
   , config = require('./config')
-  , nodeDBI = require('../lib/dbWrapper');
+  , nodeDBI = require('../index.js');
 
 
 var testedAdapterNames = [
@@ -122,6 +122,8 @@ var secondInsertedUser = {
 
 var DBWrapper = nodeDBI.DBWrapper;
 var DBExpr = nodeDBI.DBExpr;
+//console.log('DBWrapper=');console.dir(DBWrapper);
+//console.log('DBExpr=');console.dir(DBExpr);
 
 
 /**
@@ -419,8 +421,8 @@ var adapterTestSuite = function( adapterName, callback )
       
       'callback': function()
       {
-        //console.log('\n"' + adapterName + '" adapter test suite finished.\n');
-        callback();
+        //console.log('\n"' + adapterName + '" adapter test suite finished ; let\'s close the connection !\n');
+        dbWrapper.close( callback );
       }
     }
     

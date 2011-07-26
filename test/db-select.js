@@ -10,7 +10,7 @@ var vows = require('vows')
   , async = require('async')
   , _ = require('underscore')
   , config = require('./config')
-  , nodeDBI = require('../lib/dbWrapper');
+  , nodeDBI = require('../index.js');
 
 
 var testedAdapterNames = [
