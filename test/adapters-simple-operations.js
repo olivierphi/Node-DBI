@@ -26,9 +26,10 @@ var vows = require('vows')
 
 
 var testedAdapterNames = [
-  'mysql-libmysqlclient',              
-  'mysql',             
-  'sqlite3'              
+//  'mysql-libmysqlclient',              
+//  'mysql',             
+  'sqlite3',
+  'pg'         
 ];
 
 
@@ -78,11 +79,11 @@ var getTableCreationSql = function( adapterName, tableName )
           last_name VARCHAR(100) NOT NULL,   \
           nickname VARCHAR(20) ,   \
           birth_date DATE NOT NULL,  \
-          num_children INT NOT NULL ,  \
+          num_children INT NOT NULL DEFAULT 0,  \
           enabled INT NOT NULL \
         );  \
       '.replace('{tableName}', tableName ); 
-      
+
     default:
       throw new Error('Unknown Adapter "'+adapterName+'" !');
        
