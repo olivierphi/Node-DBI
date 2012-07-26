@@ -29,5 +29,6 @@
   "keywords": ["database", "SQL", "abstraction", "common", "mysql", "sqlite"],
   "engines": {
     "node": ">= 0.4.4 < 0.7.0"
-  }
+  },
+  "# vim: ts=2 sw=2 et ": null
 }
