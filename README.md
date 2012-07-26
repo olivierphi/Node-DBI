@@ -165,7 +165,7 @@ Any SQL database engine can theorically be added, with only a quick Adapter writ
 
 To run tests manual DB configuration is required first.
 
-Currently MySQL is expected to be available on localhost with user, pass and DB all set to "test".
+MySQL is expected to be available on localhost with user, pass and DB all set to "test".
 
 E.g. this should work:
 
@@ -177,6 +177,18 @@ This can usually be achieved by installing mysql and at the mysql interactive pr
 	Query OK, 1 row affected (0.00 sec)
 	mysql> grant all on test.* to 'test'@'localhost' identified by 'test';
 	Query OK, 0 rows affected (0.08 sec)
+
+PostgreSQL is similar to MySQL, e.g. this should work:
+
+	$ $ psql -U test -W test
+	Password for user test: (manually typing "test" here)
+
+Once PostgreSQL is installed this can usually be achieved with by issuing the following commands at the psql interactive prompt:
+
+	postgres=# create user test password 'test';
+	CREATE ROLE
+	postgres=# create database test owner test;
+	CREATE DATABASE
 
 ## License
 

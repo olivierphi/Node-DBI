@@ -26,8 +26,8 @@ var vows = require('vows')
 
 
 var testedAdapterNames = [
-//  'mysql-libmysqlclient',              
-//  'mysql',             
+  'mysql-libmysqlclient',              
+  'mysql',             
   'sqlite3',
   'pg'         
 ];
