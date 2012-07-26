@@ -161,6 +161,23 @@ And of course, these database engines, which makes the really hard work in Node-
  
 Any SQL database engine can theorically be added, with only a quick Adapter writing. See the existing Adapters or contact me for help, if you want to add one !
 
+## Testing
+
+To run tests manual DB configuration is required first.
+
+Currently MySQL is expected to be available on localhost with user, pass and DB all set to "test".
+
+E.g. this should work:
+
+	$ mysql -hlocalhost -utest -ptest test
+
+This can usually be achieved by installing mysql and at the mysql interactive prompt issuing the following commands:
+
+	mysql> create database test;
+	Query OK, 1 row affected (0.00 sec)
+	mysql> grant all on test.* to 'test'@'localhost' identified by 'test';
+	Query OK, 0 rows affected (0.08 sec)
+
 ## License
 
 Node-DBI is licensed under the MIT license.
