@@ -1,13 +1,23 @@
 {
   "name": "node-dbi",
   "description": "A Database abstraction layer for Node.js, bundled with several DB engines adapters",
-  "version": "0.4.2",
-  "homepage": "https://github.com/DrBenton/Node-DBI",
+  "version": "0.5.0",
+  "homepage": "https://github.com/neerolyte/Node-DBI",
   "repository": {
     "type": "git",
-    "url": "git://github.com/pronebird/Node-DBI.git"
+    "url": "git://github.com/neerolyte/Node-DBI.git"
   },
-  "author": "Dr. Benton (http://www.dr-benton.com)",
+  "author": "David Schoen <dave@lyte.id.au>",
+  "contributors": [
+    {
+      "name": "Dr. Benton",
+      "url": "http://www.dr-benton.com"
+    },
+    {
+      "name": "Fabian Bornhofen",
+      "url": "http://fabianbornhofen.blogspot.com/"
+    }
+  ],
   "main": "dbWrapper.js",
   "directories": {
     "lib": "lib",
@@ -29,7 +39,10 @@
   "scripts": {
     "test": "node test/all.js"
   },
-  "keywords": ["database", "SQL", "abstraction", "common", "mysql", "sqlite"],
+  "keywords": [
+    "database", "SQL", "abstraction", "common", "mysql", "sqlite", "pg", 
+    "postgres", "postgresql"
+  ],
   "engines": {
     "node": ">= 0.4.4 < 0.9.0"
   },
