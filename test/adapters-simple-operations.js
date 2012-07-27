@@ -22,13 +22,15 @@ var vows = require('vows')
   , async = require('async')
   , _ = require('underscore')
   , config = require('./config')
-  , nodeDBI = require('../index.js');
+  , nodeDBI = require('../index.js')
+  , util = require('util');
 
 
 var testedAdapterNames = [
   'mysql-libmysqlclient',              
   'mysql',             
-  'sqlite3'              
+  'sqlite3',
+  'pg'         
 ];
 
 
@@ -78,11 +80,11 @@ var getTableCreationSql = function( adapterName, tableName )
           last_name VARCHAR(100) NOT NULL,   \
           nickname VARCHAR(20) ,   \
           birth_date DATE NOT NULL,  \
-          num_children INT NOT NULL ,  \
+          num_children INT NOT NULL DEFAULT 0,  \
           enabled INT NOT NULL \
         );  \
       '.replace('{tableName}', tableName ); 
-      
+
     default:
       throw new Error('Unknown Adapter "'+adapterName+'" !');
        
@@ -137,7 +139,7 @@ var adapterTestSuite = function( adapterName, callback )
   
   var tableName = 'test_' + ( 100 + Math.round( Math.random() * 5000 )  );
   
-  //console.log('\n"' + adapterName + '" adapter test suite starts ! \n');
+  console.log('\n"' + adapterName + '" adapter test suite starts ! \n');
   
   vows.describe('Basic SQL operations with the "'+adapterName+'" adapter').addBatch( {
     
@@ -180,7 +182,7 @@ var adapterTestSuite = function( adapterName, callback )
     'data retrieval (data is retrieved with "fetchAll()")': {
       topic: function()
       {
-        dbWrapper.fetchAll( 'SELECT * FROM `'+tableName+'` WHERE id=?', [ 1 ], this.callback );
+        dbWrapper.fetchAll( 'SELECT * FROM '+dbWrapper._adapter.escapeTable(tableName)+' WHERE id=?', [ 1 ], this.callback );
       },
       
       'no error': function(err, res )
@@ -198,10 +200,12 @@ var adapterTestSuite = function( adapterName, callback )
         assert.equal( res[0].first_name, firstInsertedUser.first_name );
         assert.equal( res[0].last_name, firstInsertedUser.last_name );
         assert.equal( res[0].nickname, null );
-        if( -1 == adapterName.indexOf('lite') )
-          assert.equal( res[0].birth_date.toUTCString().substr(0, 25), 'Thu, 12 Apr 1951 00:00:00' );
-        else
+        if( -1 != adapterName.indexOf('lite') )
           assert.equal( res[0].birth_date, '1951-04-12 00:00:00' );//SQLite doesn't handle Dates
+        else if ( -1 != adapterName.indexOf('pg') )
+          assert.equal( res[0].birth_date, '1951-04-12' );//pg doesn't handle Dates
+        else
+          assert.equal( res[0].birth_date.toUTCString().substr(0, 25), 'Thu, 12 Apr 1951 00:00:00' );
         assert.equal( res[0].num_children, 0 );
         assert.equal( res[0].enabled, firstInsertedUser.enabled );
         //console.log('data retrieval test finished');
@@ -232,7 +236,7 @@ var adapterTestSuite = function( adapterName, callback )
     'updated data check (this time, data is retrieved with "fetchRow()")': {
       topic: function()
       {
-        dbWrapper.fetchRow( 'SELECT * FROM `'+tableName+'` WHERE id=? AND first_name=?', [ 1, firstUserUpdate.first_name ], this.callback );
+        dbWrapper.fetchRow( 'SELECT * FROM '+dbWrapper._adapter.escapeTable(tableName)+' WHERE id=? AND first_name=?', [ 1, firstUserUpdate.first_name ], this.callback );
       },
       
       'no error': function(err, res )
@@ -248,10 +252,12 @@ var adapterTestSuite = function( adapterName, callback )
         assert.equal( res.first_name, expectedUser.first_name );
         assert.equal( res.last_name, expectedUser.last_name );
         assert.equal( res.nickname, expectedUser.nickname );
-        if( -1 == adapterName.indexOf('lite') )
-          assert.equal( res.birth_date.toUTCString(), expectedUser.birth_date.toUTCString() );
-        else
+        if ( -1 != adapterName.indexOf('lite') )
           assert.equal( res.birth_date, '1951-04-12 00:00:00' );//SQLite doesn't handle Dates
+        else if ( -1 != adapterName.indexOf('pg') )
+          assert.equal( res.birth_date, '1951-04-12' );//pg doesn't handle Dates
+        else
+          assert.equal( res.birth_date.toUTCString(), expectedUser.birth_date.toUTCString() );
         assert.equal( res.num_children, expectedUser.num_children );
         assert.equal( res.enabled, expectedUser.enabled );
         //console.log('updated data check test finished');
@@ -284,7 +290,9 @@ var adapterTestSuite = function( adapterName, callback )
       
       'last insert id is OK': function()
       {
-        assert.equal( dbWrapper.getLastInsertId(), 2 );
+        // pg doesn't support getLastInsertId()
+        if ( -1 == adapterName.indexOf('pg') )
+          assert.equal( dbWrapper.getLastInsertId(), 2 );
         //console.log('last insert id test finished');
       }
     }//end last insert id
@@ -294,14 +302,9 @@ var adapterTestSuite = function( adapterName, callback )
     'data retrieval (data is retrieved with "fetchCol()")': {
       topic: function()
       {
-        var sql = ' \
-          SELECT \
-            nickname \
-          FROM \
-            `'+tableName+'` \
-          ORDER BY \
-            id ASC \
-        '; 
+        var sql = 'SELECT nickname FROM '
+          +dbWrapper._adapter.escapeTable(tableName)
+          +' ORDER BY id ASC'; 
         dbWrapper.fetchCol( sql, [], this.callback );
       },
       
@@ -345,7 +348,8 @@ var adapterTestSuite = function( adapterName, callback )
     'data removal check (data is retrieved with "fetchOne()")': {
       topic: function()
       {
-        dbWrapper.fetchOne( 'SELECT COUNT(*) FROM `'+tableName+'`', [], this.callback );
+        var escapedTableName = dbWrapper._adapter.escapeTable(tableName);
+        dbWrapper.fetchOne( 'SELECT COUNT(*) FROM '+escapedTableName, [], this.callback );
       },
       
       'no error': function(err, res )
@@ -390,7 +394,10 @@ var adapterTestSuite = function( adapterName, callback )
       
       'no error': function(err, res )
       {
-        assert.isNull( err, (err) ? err.message : null  );
+        assert.isNull( 
+          err, 
+          (err) ? "DB Error: " + err.message : null  
+        );
       },
       'returned data is OK': function(err, res )
       {
@@ -405,7 +412,8 @@ var adapterTestSuite = function( adapterName, callback )
     'table drop': {
       topic: function()
       {
-        dbWrapper.query( 'DROP TABLE `'+tableName+'`', [], this.callback );
+        var escapedTableName = dbWrapper._adapter.escapeTable(tableName);
+        dbWrapper.query( 'DROP TABLE '+escapedTableName, [], this.callback );
       },
       
       'no error': function(err, res )
@@ -461,4 +469,4 @@ if( process.argv[1]==__filename )
     
 }  
 
-
+// vim: ts=2 sw=2 et

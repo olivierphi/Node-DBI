@@ -2,7 +2,7 @@
 
 Node-DBI is a SQL database abstraction layer library, strongly inspired by the PHP Zend Framework [Zend_Db API](http://framework.zend.com/manual/en/zend.db.html).
 It provides unified functions to work with multiple database engines, through Adapters classes.
-At this time, supported engines are [mysql](https://github.com/felixge/node-mysql), [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient) and [sqlite3](https://github.com/developmentseed/node-sqlite3), but other engines adapters should be easy to add.
+At this time, supported engines are [mysql](https://github.com/felixge/node-mysql), [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient), [sqlite3](https://github.com/developmentseed/node-sqlite3) and [pg](http://github.com/brianc/node-postgres).
 
 It provides __DBWrapper__ and __DBSelect__ Javascript classes, described later on this document.
 
@@ -22,7 +22,7 @@ The example below demonstates the Node-DBI usage:
     var DBExpr = require('node-dbi').DBExpr; 
     var dbConnectionConfig = { host: 'localhost', user: 'test', password: 'test', database: 'test' };
     
-    // Replace the adapter name with "mysql", "mysql-libmysqlclient" or "sqlite3" on the following line :
+    // Replace the adapter name with "mysql", "mysql-libmysqlclient", "sqlite3" or "pg" on the following line :
     dbWrapper = new DBWrapper( '[DB engine adapter name]', dbConnectionConfig );
     
     
@@ -152,17 +152,50 @@ Thanks to these great modules, which Node-DBI relies on :
  * [underscore](https://github.com/grayrest/underscore)
  * [vows](https://github.com/cloudhead/vows) for the unit tests
 
-
 And of course, these database engines, which makes the really hard work in Node-DBI :
 
  * [mysql](https://github.com/felixge/node-mysql)
  * [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient)
  * [sqlite3](https://github.com/developmentseed/node-sqlite3)
+ * [pg](http://github.com/brianc/node-postgres)
  
 Any SQL database engine can theorically be added, with only a quick Adapter writing. See the existing Adapters or contact me for help, if you want to add one !
+
+## Testing
+
+To run tests manual DB configuration is required first.
+
+MySQL is expected to be available on localhost with user, pass and DB all set to "test".
+
+E.g. this should work:
+
+	$ mysql -hlocalhost -utest -ptest test
+
+This can usually be achieved by installing mysql and at the mysql interactive prompt issuing the following commands:
+
+	mysql> create database test;
+	Query OK, 1 row affected (0.00 sec)
+	mysql> grant all on test.* to 'test'@'localhost' identified by 'test';
+	Query OK, 0 rows affected (0.08 sec)
+
+PostgreSQL is similar to MySQL, e.g. this should work:
+
+	$ $ psql -U test -W test
+	Password for user test: (manually typing "test" here)
+
+Once PostgreSQL is installed this can usually be achieved with by issuing the following commands at the psql interactive prompt:
+
+	postgres=# create user test password 'test';
+	CREATE ROLE
+	postgres=# create database test owner test;
+	CREATE DATABASE
+
+## Driver Differences
+
+Currently the PostgreSQL driver does not support getLastInsertId().
+
+MySQL drivers return JavaScript Date objects when the table data is a date, other drivers do not.
 
 ## License
 
 Node-DBI is licensed under the MIT license.
-
-  

@@ -16,7 +16,8 @@ var vows = require('vows')
 var testedAdapterNames = [
   'mysql-libmysqlclient',              
   'mysql',
-  'sqlite3'
+  'sqlite3',
+  'pg'
 ];
 
 
@@ -33,7 +34,7 @@ var adapterTestSuite = function( adapterName, callback )
 
   var tableName = 'test_' + ( 100 + Math.round( Math.random() * 5000 )  );
   
-  //console.log('\n"' + adapterName + '" adapter test suite starts ! \n');
+  console.log('\n"' + adapterName + '" adapter test suite starts ! \n');
   
   vows.describe('Basic SQL operations with the "'+adapterName+'" adapter').addBatch( {
     
@@ -60,7 +61,8 @@ var adapterTestSuite = function( adapterName, callback )
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'SELECT `user`.* FROM `user`' );
+        var escapedTable = dbWrapper._adapter.escapeTable('user');
+        assert.equal( select.assemble(), 'SELECT '+escapedTable+'.* FROM '+escapedTable );
       }
       
     },
@@ -73,7 +75,9 @@ var adapterTestSuite = function( adapterName, callback )
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'SELECT `user`.`first_name` FROM `user`' );
+        var escapedTable = dbWrapper._adapter.escapeTable('user');
+        var escapedField = dbWrapper._adapter.escapeField('first_name');
+        assert.equal( select.assemble(), 'SELECT '+escapedTable+'.'+escapedField+' FROM '+escapedTable );
       }
       
     },
@@ -86,7 +90,12 @@ var adapterTestSuite = function( adapterName, callback )
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'SELECT `user`.`first_name`, `user`.`last_name`, `user`.`birth_date` FROM `user`' );
+        var user = dbWrapper._adapter.escapeTable('user')
+          , first_name = dbWrapper._adapter.escapeField('first_name')
+          , last_name = dbWrapper._adapter.escapeField('last_name')
+          , birth_date = dbWrapper._adapter.escapeField('birth_date')
+          ;
+        assert.equal( select.assemble(), 'SELECT '+user+'.'+first_name+', '+user+'.'+last_name+', '+user+'.'+birth_date+' FROM '+user );
       }
       
     },
@@ -99,7 +108,10 @@ var adapterTestSuite = function( adapterName, callback )
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'SELECT `user`.*, `details`.* FROM `user`, `details`' );
+        var user = dbWrapper._adapter.escapeTable('user')
+          , details = dbWrapper._adapter.escapeTable('details')
+          ;
+        assert.equal( select.assemble(), 'SELECT '+user+'.*, '+details+'.* FROM '+user+', '+details );
       }
       
     }, 
@@ -107,15 +119,24 @@ var adapterTestSuite = function( adapterName, callback )
     'custom fields in a basic SELECT with 3 tables - with the use of DBExpr for non-escaped values': {
       topic: function()
       {
+        var user = dbWrapper._adapter.escapeTable('user');
         return dbWrapper.getSelect()
-          .from('user', new DBExpr('COUNT(`user`.*)') )
+          .from('user', new DBExpr('COUNT('+user+'.*)') )
           .from('details', ['creation_date', 'last_update_date'] )
           .from('facebook_info', ['facebook_id', 'nb_friends']);
       },
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'SELECT COUNT(`user`.*), `details`.`creation_date`, `details`.`last_update_date`, `facebook_info`.`facebook_id`, `facebook_info`.`nb_friends` FROM `user`, `details`, `facebook_info`' );
+        var user = dbWrapper._adapter.escapeTable('user')
+          , details = dbWrapper._adapter.escapeTable('details')
+          , facebook_info = dbWrapper._adapter.escapeTable('facebook_info')
+          , creation_date = dbWrapper._adapter.escapeField('creation_date')
+          , last_update_date = dbWrapper._adapter.escapeField('last_update_date')
+          , facebook_id = dbWrapper._adapter.escapeField('facebook_id')
+          , nb_friends = dbWrapper._adapter.escapeField('nb_friends')
+          ;
+        assert.equal( select.assemble(), 'SELECT COUNT('+user+'.*), '+details+'.'+creation_date+', '+details+'.'+last_update_date+', '+facebook_info+'.'+facebook_id+', '+facebook_info+'.'+nb_friends+' FROM '+user+', '+details+', '+facebook_info );
       }
       
     },
@@ -128,7 +149,8 @@ var adapterTestSuite = function( adapterName, callback )
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'SELECT `user`.* FROM `user` WHERE enabled=1' );
+        var user = dbWrapper._adapter.escapeTable('user');
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1' );
       }
       
     },
@@ -144,7 +166,8 @@ var adapterTestSuite = function( adapterName, callback )
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'SELECT `user`.* FROM `user` WHERE enabled=1 AND id=10' );
+        var user = dbWrapper._adapter.escapeTable('user');
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10' );
       }
       
     },
@@ -163,7 +186,8 @@ var adapterTestSuite = function( adapterName, callback )
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'SELECT `user`.* FROM `user` WHERE enabled=1 AND id=10 AND first_name=\'Dr.\' AND last_name LIKE \'%Benton%\' AND nickname='+dbWrapper.escape('"`\'éàèç') );
+        var user = dbWrapper._adapter.escapeTable('user');
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10 AND first_name=\'Dr.\' AND last_name LIKE \'%Benton%\' AND nickname='+dbWrapper.escape('"`\'éàèç') );
       }
       
     },
@@ -194,7 +218,8 @@ var adapterTestSuite = function( adapterName, callback )
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'SELECT `user`.* FROM `user` WHERE DAY(date_created)=DAY( NOW() )' );
+        var user = dbWrapper._adapter.escapeTable('user');
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE DAY(date_created)=DAY( NOW() )' );
       }
       
     },
@@ -211,7 +236,8 @@ var adapterTestSuite = function( adapterName, callback )
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'SELECT `user`.* FROM `user` WHERE enabled=1 AND id=10 LIMIT 10' );
+        var user = dbWrapper._adapter.escapeTable('user');
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10 LIMIT 10' );
       }
       
     },
@@ -228,7 +254,8 @@ var adapterTestSuite = function( adapterName, callback )
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'SELECT `user`.* FROM `user` WHERE enabled=1 AND id=10 LIMIT 30, 10' );
+        var user = dbWrapper._adapter.escapeTable('user');
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10 LIMIT 30, 10' );
       }
       
     },
@@ -246,7 +273,9 @@ var adapterTestSuite = function( adapterName, callback )
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'SELECT `user`.* FROM `user` WHERE enabled=1 AND id=10 ORDER BY `first_name` ASC LIMIT 10' );
+        var user = dbWrapper._adapter.escapeTable('user')
+          , first_name = dbWrapper._adapter.escapeField('first_name');
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10 ORDER BY '+first_name+' ASC LIMIT 10' );
       }
       
     },
@@ -264,7 +293,9 @@ var adapterTestSuite = function( adapterName, callback )
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'SELECT `user`.* FROM `user` WHERE enabled=1 AND id=10 ORDER BY `first_name` DESC LIMIT 10' );
+        var user = dbWrapper._adapter.escapeTable('user')
+          , first_name = dbWrapper._adapter.escapeField('first_name');
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10 ORDER BY '+first_name+' DESC LIMIT 10' );
       }
       
     }
