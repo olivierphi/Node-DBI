@@ -7,16 +7,10 @@
     "type": "git",
     "url": "git://github.com/neerolyte/Node-DBI.git"
   },
-  "author": "David Schoen <dave@lyte.id.au>",
-  "contributors": [
-    {
-      "name": "Dr. Benton",
-      "url": "http://www.dr-benton.com"
-    },
-    {
-      "name": "Fabian Bornhofen",
-      "url": "http://fabianbornhofen.blogspot.com/"
-    }
+  "authors": [
+    "David Schoen <dave@lyte.id.au>",
+    "Dr. Benton (http://www.dr-benton.com)",
+    "Fabian Bornhofen (http://fabianbornhofen.blogspot.com)"
   ],
   "main": "dbWrapper.js",
   "directories": {
