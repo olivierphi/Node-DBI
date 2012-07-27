@@ -2,7 +2,7 @@
 /**
  * The Node-DBI module entry point.
  *   
- * @author Dr. Benton - www.dr-benton.com
+ * @author Dr. Benton - github.com/DrBenton
  * @see https://github.com/DrBenton/Node-DBI
  */
 
