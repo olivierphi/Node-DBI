@@ -290,7 +290,9 @@ var adapterTestSuite = function( adapterName, callback )
       
       'last insert id is OK': function()
       {
-        assert.equal( dbWrapper.getLastInsertId(), 2 );
+        // pg doesn't support getLastInsertId()
+        if ( -1 == adapterName.indexOf('pg') )
+          assert.equal( dbWrapper.getLastInsertId(), 2 );
         //console.log('last insert id test finished');
       }
     }//end last insert id
