@@ -190,6 +190,12 @@ Once PostgreSQL is installed this can usually be achieved with by issuing the fo
 	postgres=# create database test owner test;
 	CREATE DATABASE
 
+## Driver Differences
+
+Currently the PostgreSQL driver does not support getLastInsertId().
+
+MySQL drivers return JavaScript Date objects when the table data is a date, other drivers do not.
+
 ## License
 
 Node-DBI is licensed under the MIT license.
