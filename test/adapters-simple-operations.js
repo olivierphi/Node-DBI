@@ -22,7 +22,8 @@ var vows = require('vows')
   , async = require('async')
   , _ = require('underscore')
   , config = require('./config')
-  , nodeDBI = require('../index.js');
+  , nodeDBI = require('../index.js')
+  , util = require('util');
 
 
 var testedAdapterNames = [
@@ -199,10 +200,12 @@ var adapterTestSuite = function( adapterName, callback )
         assert.equal( res[0].first_name, firstInsertedUser.first_name );
         assert.equal( res[0].last_name, firstInsertedUser.last_name );
         assert.equal( res[0].nickname, null );
-        if( -1 == adapterName.indexOf('lite') )
-          assert.equal( res[0].birth_date.toUTCString().substr(0, 25), 'Thu, 12 Apr 1951 00:00:00' );
-        else
+        if( -1 != adapterName.indexOf('lite') )
           assert.equal( res[0].birth_date, '1951-04-12 00:00:00' );//SQLite doesn't handle Dates
+        else if ( -1 != adapterName.indexOf('pg') )
+          assert.equal( res[0].birth_date, '1951-04-12' );//pg doesn't handle Dates
+        else
+          assert.equal( res[0].birth_date.toUTCString().substr(0, 25), 'Thu, 12 Apr 1951 00:00:00' );
         assert.equal( res[0].num_children, 0 );
         assert.equal( res[0].enabled, firstInsertedUser.enabled );
         //console.log('data retrieval test finished');
@@ -249,10 +252,12 @@ var adapterTestSuite = function( adapterName, callback )
         assert.equal( res.first_name, expectedUser.first_name );
         assert.equal( res.last_name, expectedUser.last_name );
         assert.equal( res.nickname, expectedUser.nickname );
-        if( -1 == adapterName.indexOf('lite') )
-          assert.equal( res.birth_date.toUTCString(), expectedUser.birth_date.toUTCString() );
-        else
+        if ( -1 != adapterName.indexOf('lite') )
           assert.equal( res.birth_date, '1951-04-12 00:00:00' );//SQLite doesn't handle Dates
+        else if ( -1 != adapterName.indexOf('pg') )
+          assert.equal( res.birth_date, '1951-04-12' );//pg doesn't handle Dates
+        else
+          assert.equal( res.birth_date.toUTCString(), expectedUser.birth_date.toUTCString() );
         assert.equal( res.num_children, expectedUser.num_children );
         assert.equal( res.enabled, expectedUser.enabled );
         //console.log('updated data check test finished');
