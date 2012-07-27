@@ -139,7 +139,7 @@ var adapterTestSuite = function( adapterName, callback )
   
   var tableName = 'test_' + ( 100 + Math.round( Math.random() * 5000 )  );
   
-  //console.log('\n"' + adapterName + '" adapter test suite starts ! \n');
+  console.log('\n"' + adapterName + '" adapter test suite starts ! \n');
   
   vows.describe('Basic SQL operations with the "'+adapterName+'" adapter').addBatch( {
     
@@ -182,7 +182,7 @@ var adapterTestSuite = function( adapterName, callback )
     'data retrieval (data is retrieved with "fetchAll()")': {
       topic: function()
       {
-        dbWrapper.fetchAll( 'SELECT * FROM `'+tableName+'` WHERE id=?', [ 1 ], this.callback );
+        dbWrapper.fetchAll( 'SELECT * FROM '+dbWrapper._adapter.escapeTable(tableName)+' WHERE id=?', [ 1 ], this.callback );
       },
       
       'no error': function(err, res )
@@ -236,7 +236,7 @@ var adapterTestSuite = function( adapterName, callback )
     'updated data check (this time, data is retrieved with "fetchRow()")': {
       topic: function()
       {
-        dbWrapper.fetchRow( 'SELECT * FROM `'+tableName+'` WHERE id=? AND first_name=?', [ 1, firstUserUpdate.first_name ], this.callback );
+        dbWrapper.fetchRow( 'SELECT * FROM '+dbWrapper._adapter.escapeTable(tableName)+' WHERE id=? AND first_name=?', [ 1, firstUserUpdate.first_name ], this.callback );
       },
       
       'no error': function(err, res )
@@ -302,14 +302,9 @@ var adapterTestSuite = function( adapterName, callback )
     'data retrieval (data is retrieved with "fetchCol()")': {
       topic: function()
       {
-        var sql = ' \
-          SELECT \
-            nickname \
-          FROM \
-            `'+tableName+'` \
-          ORDER BY \
-            id ASC \
-        '; 
+        var sql = 'SELECT nickname FROM '
+          +dbWrapper._adapter.escapeTable(tableName)
+          +' ORDER BY id ASC'; 
         dbWrapper.fetchCol( sql, [], this.callback );
       },
       
@@ -353,7 +348,8 @@ var adapterTestSuite = function( adapterName, callback )
     'data removal check (data is retrieved with "fetchOne()")': {
       topic: function()
       {
-        dbWrapper.fetchOne( 'SELECT COUNT(*) FROM `'+tableName+'`', [], this.callback );
+        var escapedTableName = dbWrapper._adapter.escapeTable(tableName);
+        dbWrapper.fetchOne( 'SELECT COUNT(*) FROM '+escapedTableName, [], this.callback );
       },
       
       'no error': function(err, res )
@@ -398,7 +394,10 @@ var adapterTestSuite = function( adapterName, callback )
       
       'no error': function(err, res )
       {
-        assert.isNull( err, (err) ? err.message : null  );
+        assert.isNull( 
+          err, 
+          (err) ? "DB Error: " + err.message : null  
+        );
       },
       'returned data is OK': function(err, res )
       {
@@ -413,7 +412,8 @@ var adapterTestSuite = function( adapterName, callback )
     'table drop': {
       topic: function()
       {
-        dbWrapper.query( 'DROP TABLE `'+tableName+'`', [], this.callback );
+        var escapedTableName = dbWrapper._adapter.escapeTable(tableName);
+        dbWrapper.query( 'DROP TABLE '+escapedTableName, [], this.callback );
       },
       
       'no error': function(err, res )
