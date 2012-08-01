@@ -28,63 +28,63 @@ dbWrapper = new DBWrapper( '[DB engine adapter name]', dbConnectionConfig );
 
 // ** fetchAll
 dbWrapper.fetchAll('SELECT * FROM user', null, function(err, result) {
-if( ! result )
-console.dir(result);
-// "result" is an Array with a hash for every returned row
+	if( ! result )
+		console.dir(result);
+	// "result" is an Array with a hash for every returned row
 } );
 
 // ** fetchRow ( +  a safely escaped value ) 
 dbWrapper.fetchRow('SELECT * FROM user WHERE first_name=?', ['John'], function(err, result) {
-if( ! result )
-console.dir(result);
-// this time, "result" is a single hash (the first returned row)
+	if( ! result )
+		console.dir(result);
+	// this time, "result" is a single hash (the first returned row)
 } );
 
 // ** fetchCol  (if you dont' have values to escape, the 2nd param can be an empty Array or "null")
 dbWrapper.fetchCol('SELECT first_name FROM user ORDER BY fist_name', null, function(err, result) {
-if( ! err )
-console.dir(result);
-// "result" is an Array with all the names of our users, sorted alphabetically
+	if( ! err )
+		console.dir(result);
+	// "result" is an Array with all the names of our users, sorted alphabetically
 } );
 
 // ** fetchOne
 dbWrapper.fetchOne('SELECT fist_name FROM user ORDER BY rank DESC LIMIT 1', [], function(err, result) {
-if( ! err )
-console.dir(result);
-// "result" is the first_name of our best user
+	if( ! err )
+		console.dir(result);
+	// "result" is the first_name of our best user
 } );
 
 // ** insert   (DBExpr force somes values to be used "as is", without safe escape : it is useful for SQL functions like "NOW()", "COUNT(*)", "SUM(rank)"... )
 var JohnData = { first_name: 'John', last_name: 'Foo', rank: '3', date_created: new DBExpr('NOW()') };
 dbWrapper.insert('user', JohnData , function(err) {
-if( ! err )
-console.log( 'John ID : ' + dbWrapper.getLastInsertId() );
-// John has been inserted in our table, with its properties safely escaped
+	if( ! err )
+		console.log( 'John ID : ' + dbWrapper.getLastInsertId() );
+	// John has been inserted in our table, with its properties safely escaped
 } );
 
 // ** update  ( here the fist name is used as a raw String, but the last name is safely escaped ) 
 var JohnDataUpdate = { rank: '1' };
-dbWrapper.update('user', JohnDataUpdate , [ 'first_name=\'John\'', ['last_name=?', 'Foo'] ], function(err) {
-// John is now our best user. Congratulations, John !
+	dbWrapper.update('user', JohnDataUpdate , [ 'first_name=\'John\'', ['last_name=?', 'Foo'] ], function(err) {
+	// John is now our best user. Congratulations, John !
 } );
 
 // ** remove  ( this time, both values are safely escaped ) 
 dbWrapper.remove('user', [ ['first_name LIKE ?', '%John%'], ['last_name=?', 'Foo'] ] , function(err) {
-// John left at the height of its glory.
+	// John left at the height of its glory.
 } );
 
 
 // Easy SQL String building
 var select = dbWrapper.getSelect()
-.from('user', ['first_name', 'last_name'] )
-.where( 'enabled=1' )
-.where( 'id=?', 10 )
-.where( 'last_name LIKE ?', '%Foo%' )
-.order( 'last_name' )
-.limit( 10 );
+	.from('user', ['first_name', 'last_name'] )
+	.where( 'enabled=1' )
+	.where( 'id=?', 10 )
+	.where( 'last_name LIKE ?', '%Foo%' )
+	.order( 'last_name' )
+	.limit( 10 );
 
 if( req.params.onlyVerifiedAccounts )
-select.where('verified=1');
+	select.where('verified=1');
 
 console.log( select.assemble() );//outputs the SQL query for debug purpose 
 
