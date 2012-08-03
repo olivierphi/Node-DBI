@@ -211,6 +211,53 @@ var adapterTestSuite = function( adapterName, callback )
       }
       
     },
+
+    'an advanced WHERE clause, with disordered from(), where() and orWhere() calls and parenthetical grouping': {
+      topic: function()
+      {
+        return dbWrapper.getSelect()
+          .where('enabled=1')
+          .where( 'id=?', 10 )
+          .from('user')
+          .where( 'first_name=?', 'Dr.')
+          .whereGroup()
+          .where( 'last_name LIKE ?', '%Benton%' )
+          .orWhere( 'nickname=?', '"`\'éàèç' );
+      },
+
+      'assembled Select is OK': function( select )
+      {
+        var user = dbWrapper._adapter.escapeTable('user');
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10 AND first_name=\'Dr.\' AND (last_name LIKE \'%Benton%\' OR nickname='+dbWrapper.escape('"`\'éàèç')+')' );
+      }
+
+    },
+
+    'an advanced WHERE clause, with more parenthetical grouping': {
+      topic: function()
+      {
+        return dbWrapper.getSelect()
+          .from('user')
+          .whereGroupClose()      // Erroneous whereGroupClose to be handled
+          .whereGroup(3)   // Multiple group start
+          .where('enabled=1')
+          .where( 'id=?', 10 )
+          .whereGroupClose()
+          .where( 'first_name=?', 'Dr.')
+          .whereGroup()
+          .where( 'last_name LIKE ?', '%Benton%' )
+          .orWhere( 'nickname=?', '"`\'éàèç' )
+          .whereGroupClose(2);
+          // Automatic closing of leftover groups
+      },
+      
+      'assembled Select is OK': function( select )
+      {
+        var user = dbWrapper._adapter.escapeTable('user');
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (((enabled=1 AND id=10) AND first_name=\'Dr.\' AND (last_name LIKE \'%Benton%\' OR nickname='+dbWrapper.escape('"`\'éàèç')+')))' );
+      }
+      
+    },
     
     'a "WHERE clause" only SELECT ': {
       topic: function()
