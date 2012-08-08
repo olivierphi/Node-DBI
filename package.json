@@ -10,7 +10,8 @@
   "authors": [
     "Dr. Benton (http://github.com/DrBenton)",
     "David Schoen <dave@lyte.id.au>",
-    "Fabian Bornhofen (http://fabianbornhofen.blogspot.com)"
+    "Fabian Bornhofen (http://fabianbornhofen.blogspot.com)",
+    "Michael Dwyer (http://github.com/kalifg)"
   ],
   "main": "dbWrapper.js",
   "directories": {
