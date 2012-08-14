@@ -129,6 +129,7 @@ Furthermore, Node-DBI provides a DBSelect class which allows easy and readable S
  * __where( whereStr, value )__:  
      * adds a WHERE clause using AND 
      * if __value__ is not null, all the "?" occurences in __whereStr__ will be replaced with the safely escaped value
+     * __value__ may be an array, it will be mapped to a parenthesized SQL list
      * the clause will be surrounded with parenthesis in the generated SQL, this way ```.where('id=? OR name=?')``` will work like it does in ZendDb.
  * __orWhere( whereStr, value )__ : just like __where__ but adds a WHERE clause using OR
  * __whereGroup( num )__ : 
