@@ -150,7 +150,7 @@ var adapterTestSuite = function( adapterName, callback )
       'assembled Select is OK': function( select )
       {
         var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1' );
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1)' );
       }
       
     },
@@ -167,7 +167,7 @@ var adapterTestSuite = function( adapterName, callback )
       'assembled Select is OK': function( select )
       {
         var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10' );
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10)' );
       }
       
     },
@@ -187,7 +187,7 @@ var adapterTestSuite = function( adapterName, callback )
       'assembled Select is OK': function( select )
       {
         var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10 AND first_name=\'Dr.\' AND last_name LIKE \'%Benton%\' AND nickname='+dbWrapper.escape('"`\'éàèç') );
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) AND (first_name=\'Dr.\') AND (last_name LIKE \'%Benton%\') AND (nickname='+dbWrapper.escape('"`\'éàèç')+')' );
       }
       
     },
@@ -207,7 +207,7 @@ var adapterTestSuite = function( adapterName, callback )
       'assembled Select is OK': function( select )
       {
         var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10 AND first_name=\'Dr.\' AND last_name LIKE \'%Benton%\' OR nickname='+dbWrapper.escape('"`\'éàèç') );
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) AND (first_name=\'Dr.\') AND (last_name LIKE \'%Benton%\') OR (nickname='+dbWrapper.escape('"`\'éàèç')+')' );
       }
       
     },
@@ -228,7 +228,7 @@ var adapterTestSuite = function( adapterName, callback )
       'assembled Select is OK': function( select )
       {
         var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10 AND first_name=\'Dr.\' AND (last_name LIKE \'%Benton%\' OR nickname='+dbWrapper.escape('"`\'éàèç')+')' );
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) AND (first_name=\'Dr.\') AND ((last_name LIKE \'%Benton%\') OR (nickname='+dbWrapper.escape('"`\'éàèç')+'))' );
       }
 
     },
@@ -254,7 +254,33 @@ var adapterTestSuite = function( adapterName, callback )
       'assembled Select is OK': function( select )
       {
         var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (((enabled=1 AND id=10) AND first_name=\'Dr.\' AND (last_name LIKE \'%Benton%\' OR nickname='+dbWrapper.escape('"`\'éàèç')+')))' );
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE ((((enabled=1) AND (id=10)) AND (first_name=\'Dr.\') AND ((last_name LIKE \'%Benton%\') OR (nickname='+dbWrapper.escape('"`\'éàèç')+'))))' );
+      }
+      
+    },
+
+    'an advanced WHERE clause, with more parenthetical grouping, compound statements and an array value': {
+      topic: function()
+      {
+        return dbWrapper.getSelect()
+          .from('user')
+          .whereGroupClose()      // Erroneous whereGroupClose to be handled
+          .whereGroup(3)   // Multiple group start
+          .where('enabled=1')
+          .where( 'id=?', 10 )
+          .whereGroupClose()
+          .where( 'first_name=\'Dr.\' OR first_name IN ?', ['Bob', 'Mike'])
+          .whereGroup()
+          .where( 'last_name LIKE ?', '%Benton%' )
+          .orWhere( 'nickname=?', '"`\'éàèç' )
+          .whereGroupClose(2);
+          // Automatic closing of leftover groups
+      },
+      
+      'assembled Select is OK': function( select )
+      {
+        var user = dbWrapper._adapter.escapeTable('user');
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE ((((enabled=1) AND (id=10)) AND (first_name=\'Dr.\' OR first_name IN (\'Bob\', \'Mike\')) AND ((last_name LIKE \'%Benton%\') OR (nickname='+dbWrapper.escape('"`\'éàèç')+'))))' );
       }
       
     },
@@ -270,7 +296,7 @@ var adapterTestSuite = function( adapterName, callback )
       
       'assembled Select is OK': function( select )
       {
-        assert.equal( select.assemble(), 'enabled=1 AND id=10 AND first_name=\'Dr.\'' );
+        assert.equal( select.assemble(), '(enabled=1) AND (id=10) AND (first_name=\'Dr.\')' );
       }
       
     },
@@ -286,7 +312,7 @@ var adapterTestSuite = function( adapterName, callback )
       'assembled Select is OK': function( select )
       {
         var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE DAY(date_created)=DAY( NOW() )' );
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (DAY(date_created)=DAY( NOW() ))' );
       }
       
     },
@@ -304,7 +330,7 @@ var adapterTestSuite = function( adapterName, callback )
       'assembled Select is OK': function( select )
       {
         var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10 LIMIT 10' );
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) LIMIT 10' );
       }
       
     },
@@ -322,7 +348,7 @@ var adapterTestSuite = function( adapterName, callback )
       'assembled Select is OK': function( select )
       {
         var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10 LIMIT 30, 10' );
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) LIMIT 30, 10' );
       }
       
     },
@@ -342,7 +368,7 @@ var adapterTestSuite = function( adapterName, callback )
       {
         var user = dbWrapper._adapter.escapeTable('user')
           , first_name = dbWrapper._adapter.escapeField('first_name');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10 ORDER BY '+first_name+' ASC LIMIT 10' );
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) ORDER BY '+first_name+' ASC LIMIT 10' );
       }
       
     },
@@ -362,7 +388,7 @@ var adapterTestSuite = function( adapterName, callback )
       {
         var user = dbWrapper._adapter.escapeTable('user')
           , first_name = dbWrapper._adapter.escapeField('first_name');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE enabled=1 AND id=10 ORDER BY '+first_name+' DESC LIMIT 10' );
+        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) ORDER BY '+first_name+' DESC LIMIT 10' );
       }
       
     }
