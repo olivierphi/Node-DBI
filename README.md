@@ -125,10 +125,17 @@ All these methods returns exactly the sames results, whatever the chosen databas
 Furthermore, Node-DBI provides a DBSelect class which allows easy and readable SQL "SELECT" Strings building. At the moment, it provides the following methods :
 
  * __from( tableName, fieldsArray )__ : adds a table in the FROM clause, and adds its fields to the SELECT
- * __where( whereStr, value )__ : adds a WHERE clause ; if "value" is not null, all the "?" occurences of the "whereStr" will be replaced with the safely escaped value
- * __limit( nbResults, startIndex )__ : set the LIMIT clause ; "startIndex" param is optionnal
- * __order( fieldName, direction )__ : adds a ORDER BY clause ; if "direction" is not set, it will be set to "ASC"
- * __join( tableName, joinStr, fieldsArray, joinType )__ : adds a JOIN clause ; if "joinType" is not set, it will be set to "INNER"
+ * __where( whereStr, value )__:  adds a WHERE clause using AND ; if __value__ is not null, all the "?" occurences in __whereStr__ will be replaced with the safely escaped value
+ * __orWhere( whereStr, value )__ : just like __where__ but adds a WHERE clause using OR
+ * __whereGroup( num )__ : opens __num__ parenthetical groupings to WHERE clause (ie adds __num__ open parentheses) ; __num__ defaults to 1
+ * __whereGroupClose( num )__ :  
+   * closes __num__ parenthetical groupings of WHERE clause (ie adds __num__ closed parentheses)
+   * __num__ defaults to 1
+   * will not close groups that do not exist
+   * open groups will be closed automatically
+ * __limit( nbResults, startIndex )__ : set the LIMIT clause ; __startIndex__ param is optionnal
+ * __order( fieldName, direction )__ : adds a ORDER BY clause ; if __direction__ is not set, it will be set to "ASC"
+ * __join( tableName, joinStr, fieldsArray, joinType )__ : adds a JOIN clause ; if __joinType__ is not set, it will be set to "INNER"
  * __distinct()__ : adds a DISTINCT() to the query
  * __groupyBy( fieldName )__ : adds a GROUPY BY clause
  * __assemble()__ : converts ou DBSelect object to an SQL SELECT string.
