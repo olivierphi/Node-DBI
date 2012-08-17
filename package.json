@@ -1,7 +1,7 @@
 {
   "name": "node-dbi",
   "description": "A Database abstraction layer for Node.js, bundled with several DB engines adapters",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "homepage": "https://github.com/DrBenton/Node-DBI",
   "repository": {
     "type": "git",
