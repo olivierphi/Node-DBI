@@ -25,7 +25,7 @@ var dbConnectionConfig = { host: 'localhost', user: 'test', password: 'test', da
 
 // Replace the adapter name with "mysql", "mysql-libmysqlclient", "sqlite3" or "pg" on the following line :
 dbWrapper = new DBWrapper( '[DB engine adapter name]', dbConnectionConfig );
-
+dbWrapper.connect();
 
 // ** fetchAll
 dbWrapper.fetchAll('SELECT * FROM user', null, function(err, result) {
@@ -107,6 +107,7 @@ See the unit tests in the "test/" folder for more examples.
 
 The __DBWrapper__ Javascript class, which is the only visible part on top on the different database engines adapters, provides the following methods :
 
+ * __connect()__ : tell DbWrapper to connect to the database.
  * __fetchAll( sql, bind, callback )__ : fetches all SQL result rows as a Array.
  * __fetchRow( sql, bind, callback )__ : fetches the first row of the SQL result.
  * __fetchCol( sql, bind, callback )__ : fetches the first column of all SQL result rows as an Array.
