@@ -186,29 +186,31 @@ Any SQL database engine can theorically be added, with only a quick Adapter writ
 
 To run tests manual DB configuration is required first.
 
-MySQL is expected to be available on localhost with user, pass and DB all set to "test".
+See ```test/config.js``` for databases setup.
+
+According to Travis CI requirements, MySQL is expected to be available on localhost with user "root", empty password and DB "node_dbi_test".
 
 E.g. this should work:
 
-	$ mysql -hlocalhost -utest -ptest test
+	$ mysql -hlocalhost -uroot node_dbi_test
 
 This can usually be achieved by installing mysql and at the mysql interactive prompt issuing the following commands:
 
-	mysql> create database test;
+	mysql> create database node_dbi_test;
 	Query OK, 1 row affected (0.00 sec)
-	mysql> grant all on test.* to 'test'@'localhost' identified by 'test';
+	mysql> grant all on node_dbi_test.* to 'root'@'localhost';
 	Query OK, 0 rows affected (0.08 sec)
 
 PostgreSQL is similar to MySQL, e.g. this should work:
 
-	$ $ psql -U test -W test
-	Password for user test: (manually typing "test" here)
+	$ $ psql -U postgres -W node_dbi_test
+	Password for user postgres: (manually typing empty password here)
 
 Once PostgreSQL is installed this can usually be achieved with by issuing the following commands at the psql interactive prompt:
 
-	postgres=# create user test password 'test';
+	postgres=# create user postgres password '';
 	CREATE ROLE
-	postgres=# create database test owner test;
+	postgres=# create database node_dbi_test owner postgres;
 	CREATE DATABASE
 
 ## Driver Differences
