@@ -217,7 +217,7 @@ Once PostgreSQL is installed this can usually be achieved with by issuing the fo
 
 Currently the PostgreSQL driver does not support getLastInsertId().
 
-MySQL drivers return JavaScript Date objects when the table data is a date, other drivers do not.
+MySQL and PostgreSQL drivers return JavaScript Date objects when the table data is a date, while SQLite driver do not.
 
 ## License
 

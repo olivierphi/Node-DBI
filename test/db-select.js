@@ -435,7 +435,8 @@ if( process.argv[1]==__filename )
 {
 
   runTest( function( err ) {
-   setTimeout( function() { process.exit(0); }, 500 );
+   var exitCode = (err) ? 1 : 0 ;
+   setTimeout( function() { process.exit(exitCode); }, 500 );
   } );
  
 }  

@@ -153,7 +153,7 @@ var DBExpr = nodeDBI.DBExpr;
  */
 var adapterTestSuite = function( adapterName, callback )
 {
-  
+
   var dbWrapper = new DBWrapper( adapterName, getDbConfig(adapterName) );
   dbWrapper.connect();
   
@@ -222,8 +222,6 @@ var adapterTestSuite = function( adapterName, callback )
         assert.equal( res[0].nickname, null );
         if( -1 != adapterName.indexOf('lite') )
           assert.equal( res[0].birth_date, '1951-04-12 00:00:00' );//SQLite doesn't handle Dates
-        else if ( -1 != adapterName.indexOf('pg') )
-          assert.equal( res[0].birth_date, '1951-04-12' );//pg doesn't handle Dates
         else
           assert.equal( res[0].birth_date.toUTCString().substr(0, 25), 'Thu, 12 Apr 1951 00:00:00' );
         assert.equal( res[0].num_children, 0 );
@@ -231,15 +229,15 @@ var adapterTestSuite = function( adapterName, callback )
         //console.log('data retrieval test finished');
       }
     }//end data retrieval
-  
+
   } ).addBatch( {
-    
+
     'data update': {
       topic: function()
       {
         dbWrapper.update( tableName, firstUserUpdate, [ 'id=1', ['first_name=?', firstInsertedUser.first_name] ], this.callback );
       },
-      
+
       'no error': function(err, res )
       {
         assert.isNull( err, (err) ? err.message : null  );
@@ -250,15 +248,15 @@ var adapterTestSuite = function( adapterName, callback )
         //console.log('data update test finished');
       }
     }//end data update
-  
+
   } ).addBatch( {
-    
+
     'updated data check (this time, data is retrieved with "fetchRow()")': {
       topic: function()
       {
         dbWrapper.fetchRow( 'SELECT * FROM '+dbWrapper._adapter.escapeTable(tableName)+' WHERE id=? AND first_name=?', [ 1, firstUserUpdate.first_name ], this.callback );
       },
-      
+
       'no error': function(err, res )
       {
         assert.isNull( err, (err) ? err.message : null  );
@@ -267,15 +265,13 @@ var adapterTestSuite = function( adapterName, callback )
       {
         var expectedUser = {};
         _.extend( expectedUser, firstInsertedUser, firstUserUpdate );
-        
+
         assert.equal( res.id, 1 );
         assert.equal( res.first_name, expectedUser.first_name );
         assert.equal( res.last_name, expectedUser.last_name );
         assert.equal( res.nickname, expectedUser.nickname );
         if ( -1 != adapterName.indexOf('lite') )
           assert.equal( res.birth_date, '1951-04-12 00:00:00' );//SQLite doesn't handle Dates
-        else if ( -1 != adapterName.indexOf('pg') )
-          assert.equal( res.birth_date, '1951-04-12' );//pg doesn't handle Dates
         else
           assert.equal( res.birth_date.toUTCString(), expectedUser.birth_date.toUTCString() );
         assert.equal( res.num_children, expectedUser.num_children );
@@ -283,15 +279,15 @@ var adapterTestSuite = function( adapterName, callback )
         //console.log('updated data check test finished');
       }
     }//end data update
-  
+
   } ).addBatch( {
-    
+
     'data insertion bis': {
       topic: function()
       {
         dbWrapper.insert( tableName, secondInsertedUser, this.callback );
       },
-      
+
       'no error': function(err, res )
       {
         assert.isNull( err, (err) ? err.message : null  );
@@ -301,13 +297,13 @@ var adapterTestSuite = function( adapterName, callback )
         assert.equal( res, 1 );
         //console.log('data insertion bis test finished');
       }
-    }//end data insertion  
-  
+    }//end data insertion
+
   } ).addBatch( {
-    
+
     'last insert id': {
       topic: [],
-      
+
       'last insert id is OK': function()
       {
         // pg doesn't support getLastInsertId()
@@ -316,18 +312,18 @@ var adapterTestSuite = function( adapterName, callback )
         //console.log('last insert id test finished');
       }
     }//end last insert id
-  
+
   } ).addBatch( {
-    
+
     'data retrieval (data is retrieved with "fetchCol()")': {
       topic: function()
       {
         var sql = 'SELECT nickname FROM '
           +dbWrapper._adapter.escapeTable(tableName)
-          +' ORDER BY id ASC'; 
+          +' ORDER BY id ASC';
         dbWrapper.fetchCol( sql, [], this.callback );
       },
-      
+
       'no error': function(err, res )
       {
         assert.isNull( err, (err) ? err.message : null  );
@@ -343,16 +339,16 @@ var adapterTestSuite = function( adapterName, callback )
         assert.equal( res[1], secondInsertedUser.nickname );
         //console.log('data retrieval bis test finished');
       }
-    }//end data retrieval  
-  
+    }//end data retrieval
+
   } ).addBatch( {
-    
+
     'data removal': {
       topic: function()
       {
         dbWrapper.remove( tableName, [ 'id=1', ['first_name=?', firstUserUpdate.first_name] ], this.callback );
       },
-      
+
       'no error': function(err, res )
       {
         assert.isNull( err, (err) ? err.message : null  );
@@ -361,17 +357,17 @@ var adapterTestSuite = function( adapterName, callback )
       {
         assert.equal( res, 1 );
       }
-    }//end data removal  
+    }//end data removal
 
   } ).addBatch( {
-    
+
     'data removal check (data is retrieved with "fetchOne()")': {
       topic: function()
       {
         var escapedTableName = dbWrapper._adapter.escapeTable(tableName);
         dbWrapper.fetchOne( 'SELECT COUNT(*) FROM '+escapedTableName, [], this.callback );
       },
-      
+
       'no error': function(err, res )
       {
         assert.isNull( err, (err) ? err.message : null  );
@@ -381,17 +377,17 @@ var adapterTestSuite = function( adapterName, callback )
         assert.equal( res, 1 );
         //console.log('data removal check test finished');
       }
-    }//end data removal check  
-  
+    }//end data removal check
+
   } ).addBatch( {
-    
+
     'DBSelect test, use with a DBWrapper fetch method': {
       topic: function()
       {
         var select = dbWrapper.getSelect().from(tableName, new DBExpr('COUNT(*)') ).where('id=?', 2);
-        dbWrapper.fetchOne( select, null, this.callback ); 
+        dbWrapper.fetchOne( select, null, this.callback );
       },
-      
+
       'no error': function(err, res )
       {
         assert.isNull( err, (err) ? err.message : null  );
@@ -401,22 +397,22 @@ var adapterTestSuite = function( adapterName, callback )
         assert.equal( res, 1 );
         //console.log('DBSelect test, use with a DBWrapper fetch method');
       }
-    }//DBSelect test, use with a DBWrapper fetch method  
-  
+    }//DBSelect test, use with a DBWrapper fetch method
+
   } ).addBatch( {
-    
+
     'DBSelect test, with a direct fetch method': {
       topic: function()
       {
         var select = dbWrapper.getSelect().from(tableName, ['first_name', 'last_name']).where('id=?', 2);
-        select.fetchRow( this.callback ); 
+        select.fetchRow( this.callback );
       },
-      
+
       'no error': function(err, res )
       {
-        assert.isNull( 
-          err, 
-          (err) ? "DB Error: " + err.message : null  
+        assert.isNull(
+          err,
+          (err) ? "DB Error: " + err.message : null
         );
       },
       'returned data is OK': function(err, res )
@@ -465,10 +461,7 @@ var runTest = function( callback )
 {
   
   async.forEachSeries( testedAdapterNames, adapterTestSuite, function(err){
-    if (err )
       callback && callback( err );
-    else
-      callback && callback( null );
   });
   
 };
@@ -484,7 +477,8 @@ if( process.argv[1]==__filename )
 {
 
   runTest( function( err ) {
-    setTimeout( function() { process.exit(0); }, 500 );
+    var exitCode = (err) ? 1 : 0 ;
+    setTimeout( function() { process.exit(exitCode); }, 500 );
   } );
 
 }
