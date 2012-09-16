@@ -25,14 +25,6 @@ var vows = require('vows')
   , nodeDBI = require('../index.js');
 
 
-var testedAdapterNames = [
-  'mysql-libmysqlclient',              
-  'mysql',             
-  'sqlite3',
-  'pg'         
-];
-
-
 var getTableCreationSql = function( adapterName, tableName )
 {
 
@@ -91,33 +83,13 @@ var getTableCreationSql = function( adapterName, tableName )
 
 };
 
-var getDbConfig = function( adapterName )
-{
-    switch ( adapterName )
-    {
-
-        case 'mysql-libmysqlclient':
-        case 'mysql':
-            return config.mysql;
-
-        case 'sqlite3':
-            return config.sqlite;
-
-        case 'pg':
-            return config.pgsql;
-
-        default:
-          throw new Error('Unknown Adapter "'+adapterName+'" !');
-
-    }
-};
-
 var firstInsertedUser = {
   first_name:     'FirstName 1',
   last_name:      'LastName 1',
   birth_date:     new Date(),
   enabled:        1
 };
+
 // We don't wanna deal with GMT shiftings, so let's force all the Date components in UTC... :-/
 firstInsertedUser.birth_date.setYear(1951);
 firstInsertedUser.birth_date.setUTCMonth(3);
@@ -154,7 +126,7 @@ var DBExpr = nodeDBI.DBExpr;
 var adapterTestSuite = function( adapterName, callback )
 {
 
-  var dbWrapper = new DBWrapper( adapterName, getDbConfig(adapterName) );
+  var dbWrapper = new DBWrapper( adapterName, config.getDbConfig(adapterName) );
   dbWrapper.connect();
   
   var tableName = 'test_' + ( 100 + Math.round( Math.random() * 5000 )  );
@@ -460,7 +432,7 @@ var adapterTestSuite = function( adapterName, callback )
 var runTest = function( callback )
 {
   
-  async.forEachSeries( testedAdapterNames, adapterTestSuite, function(err){
+  async.forEachSeries( config.testedAdapterNames, adapterTestSuite, function(err){
       callback && callback( err );
   });
   

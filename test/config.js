@@ -1,6 +1,6 @@
 // @see /.travis.yml
 
-module.exports = {
+var connectionParams = {
 
     mysql: {
         host:     '127.0.0.1',
@@ -21,3 +21,32 @@ module.exports = {
     }
 
 };
+
+module.exports.getDbConfig = function( adapterName )
+{
+    switch ( adapterName )
+    {
+
+        case 'mysql-libmysqlclient':
+        case 'mysql':
+            return connectionParams.mysql;
+
+        case 'sqlite3':
+            return connectionParams.sqlite;
+
+        case 'pg':
+            return connectionParams.pgsql;
+
+        default:
+            throw new Error('Unknown Adapter "'+adapterName+'" !');
+
+    }
+};
+
+
+module.exports.testedAdapterNames = [
+    'mysql-libmysqlclient',
+    'mysql',
+    'sqlite3',
+    'pg'
+];

@@ -21,5 +21,6 @@ var allTests = [
 async.series( allTests, function(err) {
   if( err )
     throw err;
-  setTimeout( function() { process.exit(0); }, 500 );
+  else
+    setTimeout( function() { process.exit(0); }, 500 );
 });

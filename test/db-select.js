@@ -13,14 +13,6 @@ var vows = require('vows')
   , nodeDBI = require('../index.js');
 
 
-var testedAdapterNames = [
-  'mysql-libmysqlclient',              
-  'mysql',
-  'sqlite3',
-  'pg'
-];
-
-
 var DBWrapper = nodeDBI.DBWrapper;
 var DBExpr = nodeDBI.DBExpr;
 
@@ -30,7 +22,7 @@ var DBExpr = nodeDBI.DBExpr;
 var adapterTestSuite = function( adapterName, callback )
 {
   
-  var dbWrapper = new DBWrapper( adapterName, config );
+  var dbWrapper = new DBWrapper( adapterName, config.getDbConfig(adapterName) );
 
   var tableName = 'test_' + ( 100 + Math.round( Math.random() * 5000 )  );
   
@@ -415,11 +407,8 @@ var adapterTestSuite = function( adapterName, callback )
 var runTest = function( callback )
 {
 
-  async.forEachSeries( testedAdapterNames, adapterTestSuite, function(err){
-   if (err )
+  async.forEachSeries( config.testedAdapterNames, adapterTestSuite, function(err){
      callback && callback( err );
-   else
-     callback && callback( null );
   });
 
 };
