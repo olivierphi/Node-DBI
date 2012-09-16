@@ -131,7 +131,7 @@ var adapterTestSuite = function( adapterName, callback )
   
   var tableName = 'test_' + ( 100 + Math.round( Math.random() * 5000 )  );
   
-  console.log('\n"' + adapterName + '" adapter test suite starts ! \n');
+  console.log('\n"' + adapterName + '" adapter API test suite starts ! \n');
   
   vows.describe('Basic SQL operations with the "'+adapterName+'" adapter').addBatch( {
     

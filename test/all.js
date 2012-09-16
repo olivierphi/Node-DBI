@@ -5,6 +5,8 @@
  * @see https://github.com/DrBenton/Node-DBI
  */
 
+//TODO: cleaner Unit Tests :-/
+
 var async = require('async');
 
 // Our tests definition

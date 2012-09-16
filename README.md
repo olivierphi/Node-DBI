@@ -1,5 +1,7 @@
 # Node-DBI
 
+[![build status](https://secure.travis-ci.org/DrBenton/Node-DBI.png)](http://travis-ci.org/DrBenton/Node-DBI)
+
 Node-DBI is a SQL database abstraction layer library, strongly inspired by the PHP Zend Framework [Zend_Db API](http://framework.zend.com/manual/en/zend.db.html).
 It provides unified functions to work with multiple database engines, through Adapters classes.
 At this time, supported engines are [mysql](https://github.com/felixge/node-mysql), [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient), [sqlite3](https://github.com/developmentseed/node-sqlite3) and [pg](http://github.com/brianc/node-postgres).
