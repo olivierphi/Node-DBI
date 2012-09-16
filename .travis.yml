@@ -1,0 +1,8 @@
+language: node_js
+node_js:
+  - 0.8
+  #- 0.6
+
+before_script:
+  - mysql -e 'create database node_dbi_test;'
+  - psql -c 'create database node_dbi_test;' -U postgres

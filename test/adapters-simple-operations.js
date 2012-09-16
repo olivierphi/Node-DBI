@@ -22,8 +22,7 @@ var vows = require('vows')
   , async = require('async')
   , _ = require('underscore')
   , config = require('./config')
-  , nodeDBI = require('../index.js')
-  , util = require('util');
+  , nodeDBI = require('../index.js');
 
 
 var testedAdapterNames = [
@@ -87,9 +86,30 @@ var getTableCreationSql = function( adapterName, tableName )
 
     default:
       throw new Error('Unknown Adapter "'+adapterName+'" !');
-       
+
   }
 
+};
+
+var getDbConfig = function( adapterName )
+{
+    switch ( adapterName )
+    {
+
+        case 'mysql-libmysqlclient':
+        case 'mysql':
+            return config.mysql;
+
+        case 'sqlite3':
+            return config.sqlite;
+
+        case 'pg':
+            return config.pgsql;
+
+        default:
+          throw new Error('Unknown Adapter "'+adapterName+'" !');
+
+    }
 };
 
 var firstInsertedUser = {
@@ -134,7 +154,7 @@ var DBExpr = nodeDBI.DBExpr;
 var adapterTestSuite = function( adapterName, callback )
 {
   
-  var dbWrapper = new DBWrapper( adapterName, config );
+  var dbWrapper = new DBWrapper( adapterName, getDbConfig(adapterName) );
   dbWrapper.connect();
   
   var tableName = 'test_' + ( 100 + Math.round( Math.random() * 5000 )  );
@@ -462,11 +482,11 @@ module.exports.runTest = runTest;
 
 if( process.argv[1]==__filename )
 {
-  
+
   runTest( function( err ) {
     setTimeout( function() { process.exit(0); }, 500 );
   } );
-    
-}  
+
+}
 
 // vim: ts=2 sw=2 et

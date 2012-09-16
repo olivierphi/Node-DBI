@@ -1,11 +1,23 @@
+// @see /.travis.yml
 
 module.exports = {
-    
-    host:     'localhost',
-    user:     'test',
-    password: 'test',
-    database: 'test',
-    
-    path:     './db'//SQLLite Db file path
-      
+
+    mysql: {
+        host:     '127.0.0.1',
+        user:     'root',
+        password: '',
+        database: 'node_dbi_test'
+    },
+
+    pgsql: {
+        host:     '127.0.0.1',
+        user:     'postgres',
+        password: '',
+        database: 'node_dbi_test'
+    },
+
+    sqlite: {
+        database: ':memory:'
+    }
+
 };
