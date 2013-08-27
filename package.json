@@ -27,7 +27,7 @@
   },
   "optionalDependencies": {
     "mysql-libmysqlclient": "1.3.x",
-    "mysql": "0.9.x",
+    "mysql": "0.9.6",
     "sqlite3": "2.1.x",
     "pg": "0.8.x"
   },
@@ -35,7 +35,7 @@
     "test": "node test/all.js"
   },
   "keywords": [
-    "database", "SQL", "abstraction", "common", "mysql", "sqlite", "pg", 
+    "database", "SQL", "abstraction", "common", "mysql", "sqlite", "pg",
     "postgres", "postgresql"
   ],
   "engines": {
