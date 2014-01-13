@@ -55,7 +55,7 @@ var adapterTestSuite = function( adapterName )
     });
     
     it('should handle a single custom field in a basic SELECT', function() {
-      select = dbWrapper.getSelect().from('user', 'first_name' );
+      select = dbWrapper.getSelect().from('user', 'first_name');
       
       var first_name = dbWrapper._adapter.escapeField('first_name');
       expectedSql = 'SELECT '+user+'.'+first_name+' FROM '+user;
@@ -117,6 +117,19 @@ var adapterTestSuite = function( adapterName )
         .where( 'id=?', 10 );
 
       expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10)';
+
+      expect(select.assemble()).to.equal(expectedSql);
+    });
+
+
+    it('should properly escape Strings params, even if they only contain numbers', function() {
+      //@see https://github.com/DrBenton/Node-DBI/issues/20
+      select = dbWrapper.getSelect()
+        .from('user')
+        .where('escaped=?', '1234')
+        .where('unescaped=?', 1234);
+
+      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (escaped=\'1234\') AND (unescaped=1234)';
 
       expect(select.assemble()).to.equal(expectedSql);
     });
