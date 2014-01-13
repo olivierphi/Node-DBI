@@ -121,7 +121,6 @@ var adapterTestSuite = function( adapterName )
       expect(select.assemble()).to.equal(expectedSql);
     });
 
-
     it('should properly escape Strings params, even if they only contain numbers', function() {
       //@see https://github.com/DrBenton/Node-DBI/issues/20
       select = dbWrapper.getSelect()
@@ -130,6 +129,28 @@ var adapterTestSuite = function( adapterName )
         .where('unescaped=?', 1234);
 
       expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (escaped=\'1234\') AND (unescaped=1234)';
+
+      expect(select.assemble()).to.equal(expectedSql);
+    });
+
+    it('should properly handle "0" params', function() {
+      //@see https://github.com/DrBenton/Node-DBI/issues/19
+      select = dbWrapper.getSelect()
+        .from('user')
+        .where('zero=?', 0)
+        .where('one=?', 1);
+
+      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (zero=0) AND (one=1)';
+
+      expect(select.assemble()).to.equal(expectedSql);
+    });
+
+    it('should properly handle "null" params (converted to NULL)', function() {
+      select = dbWrapper.getSelect()
+        .from('user')
+        .where('name=?', null);
+
+      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (name=NULL)';
 
       expect(select.assemble()).to.equal(expectedSql);
     });
