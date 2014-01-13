@@ -119,6 +119,7 @@ The __DBWrapper__ Javascript class, which is the only visible part on top on the
  * __getLastInsertId()__ : returns the last inserted Id
  * __isConnected()__ : tells us if the DbWrapper is connected to its database. 
  * __getSelect()__ : returns a DBSelect
+ * __close()__ : tell DbWrapper to close the database connection.
 
 All these methods returns exactly the sames results, whatever the chosen database engine is.  
 
