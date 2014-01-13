@@ -1,8 +1,9 @@
 
-/.project
-/.settings
-/nbproject/
+/test/config.js
 
-/db
+/.idea/
+/.vagrant/
+
+/db/
 .*.swp
-node_modules
+node_modules/

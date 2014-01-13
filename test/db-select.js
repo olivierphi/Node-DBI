@@ -5,10 +5,8 @@
  * @see https://github.com/DrBenton/Node-DBI
  */
 
-var vows = require('vows')
-  , assert = require('assert')
-  , async = require('async')
-  , _ = require('underscore')
+var expect = require('chai').expect
+  , _ = require('lodash')
   , config = require('./config')
   , nodeDBI = require('../index.js');
 
@@ -16,417 +14,304 @@ var vows = require('vows')
 var DBWrapper = nodeDBI.DBWrapper;
 var DBExpr = nodeDBI.DBExpr;
 
-/**
- * @see http://vowsjs.org/
- */
-var adapterTestSuite = function( adapterName, callback )
+// ------------------------------------------ begin test dependencies stuff
+
+var adapterTestSuite = function( adapterName )
 {
   
   var dbWrapper = new DBWrapper( adapterName, config.getDbConfig(adapterName) );
 
-  var tableName = 'test_' + ( 100 + Math.round( Math.random() * 5000 )  );
+  //console.log('\n"' + adapterName + '" adapter DBSelect test suite starts ! \n');
   
-  console.log('\n"' + adapterName + '" adapter DBSelect test suite starts ! \n');
-  
-  vows.describe('Basic SQL operations with the "'+adapterName+'" adapter').addBatch( {
-    
-    'DB connection': {
-      topic: function()
-      {
-        dbWrapper.connect( this.callback );
-      },
-      
-      'connected': function( err )
-      {
-        assert.ifError( err );
-        assert.ok( dbWrapper.isConnected() );
-      }
-    }
-    
-  } ).addBatch( {
-    
-    'most basic SELECT': {
-      topic: function()
-      {
-        return dbWrapper.getSelect().from('user');
-      },
-      
-      'assembled Select is OK': function( select )
-      {
-        var escapedTable = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+escapedTable+'.* FROM '+escapedTable );
-      }
-      
-    },
-  
-    'a single custom field in a basic SELECT': {
-      topic: function()
-      {
-        return dbWrapper.getSelect().from('user', 'first_name' );
-      },
-      
-      'assembled Select is OK': function( select )
-      {
-        var escapedTable = dbWrapper._adapter.escapeTable('user');
-        var escapedField = dbWrapper._adapter.escapeField('first_name');
-        assert.equal( select.assemble(), 'SELECT '+escapedTable+'.'+escapedField+' FROM '+escapedTable );
-      }
-      
-    },
-    
-    'several custom fields in a basic SELECT': {
-      topic: function()
-      {
-        return dbWrapper.getSelect().from('user', ['first_name', 'last_name', 'birth_date'] );
-      },
-      
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user')
-          , first_name = dbWrapper._adapter.escapeField('first_name')
-          , last_name = dbWrapper._adapter.escapeField('last_name')
-          , birth_date = dbWrapper._adapter.escapeField('birth_date')
-          ;
-        assert.equal( select.assemble(), 'SELECT '+user+'.'+first_name+', '+user+'.'+last_name+', '+user+'.'+birth_date+' FROM '+user );
-      }
-      
-    },
+  describe('SQL builder', function() {
 
-    'most basic SELECT with 2 tables': {
-      topic: function()
-      {
-        return dbWrapper.getSelect().from('user').from('details');
-      },
-      
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user')
-          , details = dbWrapper._adapter.escapeTable('details')
-          ;
-        assert.equal( select.assemble(), 'SELECT '+user+'.*, '+details+'.* FROM '+user+', '+details );
-      }
-      
-    }, 
+    var user;
+    var select, expectedSql;
     
-    'custom fields in a basic SELECT with 3 tables - with the use of DBExpr for non-escaped values': {
-      topic: function()
-      {
-        var user = dbWrapper._adapter.escapeTable('user');
-        return dbWrapper.getSelect()
-          .from('user', new DBExpr('COUNT('+user+'.*)') )
-          .from('details', ['creation_date', 'last_update_date'] )
-          .from('facebook_info', ['facebook_id', 'nb_friends']);
-      },
-      
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user')
-          , details = dbWrapper._adapter.escapeTable('details')
-          , facebook_info = dbWrapper._adapter.escapeTable('facebook_info')
-          , creation_date = dbWrapper._adapter.escapeField('creation_date')
-          , last_update_date = dbWrapper._adapter.escapeField('last_update_date')
-          , facebook_id = dbWrapper._adapter.escapeField('facebook_id')
-          , nb_friends = dbWrapper._adapter.escapeField('nb_friends')
-          ;
-        assert.equal( select.assemble(), 'SELECT COUNT('+user+'.*), '+details+'.'+creation_date+', '+details+'.'+last_update_date+', '+facebook_info+'.'+facebook_id+', '+facebook_info+'.'+nb_friends+' FROM '+user+', '+details+', '+facebook_info );
+    before(function(done) {
+        dbWrapper.connect( function(err) {
+          if (err) { throw err; }
+          user = dbWrapper._adapter.escapeTable('user');
+          done();
+        } );
       }
-      
-    },
+    );
+    after(function(done) {
+        dbWrapper.close( done );
+      }
+    );
+    beforeEach(function() {
+        select = null;
+        expectedSql = null;
+      }
+    );
     
-    'the most simple WHERE clause': {
-      topic: function()
-      {
-        return dbWrapper.getSelect().from('user').where('enabled=1');
-      },
+    it('should handle the most basic SELECT', function() {
+      select = dbWrapper.getSelect().from('user');
       
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1)' );
-      }
+      expectedSql = 'SELECT '+user+'.* FROM '+user;
       
-    },
+      expect(select.assemble()).to.equal(expectedSql);
+    });
     
-    'a simple WHERE clause': {
-      topic: function()
-      {
-        return dbWrapper.getSelect()
-          .from('user')
-          .where('enabled=1')
-          .where( 'id=?', 10 );
-      },
+    it('should handle a single custom field in a basic SELECT', function() {
+      select = dbWrapper.getSelect().from('user', 'first_name' );
       
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10)' );
-      }
+      var first_name = dbWrapper._adapter.escapeField('first_name');
+      expectedSql = 'SELECT '+user+'.'+first_name+' FROM '+user;
       
-    },
+      expect(select.assemble()).to.equal(expectedSql);
+    });
     
-    'an advanced WHERE clause, with disordered from() and where() calls': {
-      topic: function()
-      {
-        return dbWrapper.getSelect()
-          .where('enabled=1')
-          .where( 'id=?', 10 )
-          .from('user')
-          .where( 'first_name=?', 'Dr.')
-          .where( 'last_name LIKE ?', '%Benton%' )
-          .where( 'nickname=?', '"`\'éàèç' );
-      },
+    it('should handle several custom fields in a basic SELECT', function() {
+      select = dbWrapper.getSelect().from('user', ['first_name', 'last_name', 'birth_date'] );
       
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) AND (first_name=\'Dr.\') AND (last_name LIKE \'%Benton%\') AND (nickname='+dbWrapper.escape('"`\'éàèç')+')' );
-      }
+      var first_name = dbWrapper._adapter.escapeField('first_name')
+        , last_name = dbWrapper._adapter.escapeField('last_name')
+        , birth_date = dbWrapper._adapter.escapeField('birth_date');
+      expectedSql = 'SELECT '+user+'.'+first_name+', '+user+'.'+last_name+', '+user+'.'+birth_date+' FROM '+user;
       
-    },
-
-    'an advanced WHERE clause, with disordered from(), where() and orWhere() calls': {
-      topic: function()
-      {
-        return dbWrapper.getSelect()
-          .where('enabled=1')
-          .where( 'id=?', 10 )
-          .from('user')
-          .where( 'first_name=?', 'Dr.')
-          .where( 'last_name LIKE ?', '%Benton%' )
-          .orWhere( 'nickname=?', '"`\'éàèç' );
-      },
-      
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) AND (first_name=\'Dr.\') AND (last_name LIKE \'%Benton%\') OR (nickname='+dbWrapper.escape('"`\'éàèç')+')' );
-      }
-      
-    },
-
-    'an advanced WHERE clause, with disordered from(), where() and orWhere() calls and parenthetical grouping': {
-      topic: function()
-      {
-        return dbWrapper.getSelect()
-          .where('enabled=1')
-          .where( 'id=?', 10 )
-          .from('user')
-          .where( 'first_name=?', 'Dr.')
-          .whereGroup()
-          .where( 'last_name LIKE ?', '%Benton%' )
-          .orWhere( 'nickname=?', '"`\'éàèç' );
-      },
-
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) AND (first_name=\'Dr.\') AND ((last_name LIKE \'%Benton%\') OR (nickname='+dbWrapper.escape('"`\'éàèç')+'))' );
-      }
-
-    },
-
-    'an advanced WHERE clause, with more parenthetical grouping': {
-      topic: function()
-      {
-        return dbWrapper.getSelect()
-          .from('user')
-          .whereGroupClose()      // Erroneous whereGroupClose to be handled
-          .whereGroup(3)   // Multiple group start
-          .where('enabled=1')
-          .where( 'id=?', 10 )
-          .whereGroupClose()
-          .where( 'first_name=?', 'Dr.')
-          .whereGroup()
-          .where( 'last_name LIKE ?', '%Benton%' )
-          .orWhere( 'nickname=?', '"`\'éàèç' )
-          .whereGroupClose(2);
-          // Automatic closing of leftover groups
-      },
-      
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE ((((enabled=1) AND (id=10)) AND (first_name=\'Dr.\') AND ((last_name LIKE \'%Benton%\') OR (nickname='+dbWrapper.escape('"`\'éàèç')+'))))' );
-      }
-      
-    },
-
-    'an advanced WHERE clause, with more parenthetical grouping, compound statements and an array value': {
-      topic: function()
-      {
-        return dbWrapper.getSelect()
-          .from('user')
-          .whereGroupClose()      // Erroneous whereGroupClose to be handled
-          .whereGroup(3)   // Multiple group start
-          .where('enabled=1')
-          .where( 'id=?', 10 )
-          .whereGroupClose()
-          .where( 'first_name=\'Dr.\' OR first_name IN ?', ['Bob', 'Mike'])
-          .whereGroup()
-          .where( 'last_name LIKE ?', '%Benton%' )
-          .orWhere( 'nickname=?', '"`\'éàèç' )
-          .whereGroupClose(2);
-          // Automatic closing of leftover groups
-      },
-      
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE ((((enabled=1) AND (id=10)) AND (first_name=\'Dr.\' OR first_name IN (\'Bob\', \'Mike\')) AND ((last_name LIKE \'%Benton%\') OR (nickname='+dbWrapper.escape('"`\'éàèç')+'))))' );
-      }
-      
-    },
+      expect(select.assemble()).to.equal(expectedSql);
+    });
     
-    'a "WHERE clause" only SELECT ': {
-      topic: function()
-      {
-        return dbWrapper.getSelect()
-          .where('enabled=1')
-          .where( 'id=?', 10 )
-          .where( 'first_name=?', 'Dr.');
-      },
+    it('should handle the most basic SELECT with 2 tables', function() {
+      select = dbWrapper.getSelect().from('user').from('details');
+
+      var details = dbWrapper._adapter.escapeTable('details');
+      expectedSql = 'SELECT '+user+'.*, '+details+'.* FROM '+user+', '+details;
       
-      'assembled Select is OK': function( select )
-      {
-        assert.equal( select.assemble(), '(enabled=1) AND (id=10) AND (first_name=\'Dr.\')' );
-      }
-      
-    },
+      expect(select.assemble()).to.equal(expectedSql);
+    });
     
-    'DBExpr usage : non-escaped clauses': {
-      topic: function()
-      {
-        return dbWrapper.getSelect()
+    it('custom fields in a basic SELECT with 3 tables - with the use of DBExpr for non-escaped values', function() {
+      select = dbWrapper.getSelect()
+        .from('user', new DBExpr('COUNT('+user+'.*)') )
+        .from('details', ['creation_date', 'last_update_date'] )
+        .from('facebook_info', ['facebook_id', 'nb_friends']);
+
+      var details = dbWrapper._adapter.escapeTable('details')
+        , facebook_info = dbWrapper._adapter.escapeTable('facebook_info')
+        , creation_date = dbWrapper._adapter.escapeField('creation_date')
+        , last_update_date = dbWrapper._adapter.escapeField('last_update_date')
+        , facebook_id = dbWrapper._adapter.escapeField('facebook_id')
+        , nb_friends = dbWrapper._adapter.escapeField('nb_friends');
+      expectedSql = 'SELECT COUNT('+user+'.*), '+details+'.'+creation_date+', '
+        +details+'.'+last_update_date+', '+facebook_info+'.'+facebook_id+', '
+        +facebook_info+'.'+nb_friends+' FROM '+user+', '+details+', '+facebook_info;
+      
+      expect(select.assemble()).to.equal(expectedSql);
+    });
+
+    it('should handle the most simple WHERE clause', function() {
+      select = dbWrapper.getSelect().from('user').where('enabled=1');
+
+      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1)';
+
+      expect(select.assemble()).to.equal(expectedSql);
+    });
+
+    it('should handle a simple WHERE clause', function() {
+      select = dbWrapper.getSelect()
         .from('user')
-          .where('DAY(date_created)=?', new DBExpr('DAY( NOW() )') )
-      },
-      
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (DAY(date_created)=DAY( NOW() ))' );
-      }
-      
-    },
-    
-    'a LIMIT simple clause, with 1 param': {
-      topic: function()
-      {
-        return dbWrapper.getSelect()
-          .limit(10)
-          .where('enabled=1')
-          .from('user')
-          .where( 'id=?', 10 );
-      },
-      
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) LIMIT 10' );
-      }
-      
-    },
-    
-    'a LIMIT simple clause, with 2 params': {
-      topic: function()
-      {
-        return dbWrapper.getSelect()
+        .where('enabled=1')
+        .where( 'id=?', 10 );
+
+      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10)';
+
+      expect(select.assemble()).to.equal(expectedSql);
+    });
+
+    it('should handle an advanced WHERE clause, with special chars and disordered from() and where() calls', function() {
+      select = dbWrapper.getSelect()
+        .where('enabled=1')
+        .where( 'id=?', 10 )
+        .from('user')
+        .where( 'first_name=?', 'Dr.')
+        .where( 'last_name LIKE ?', '%Benton%' )
+        .where( 'nickname=?', '"`\'éàèç' );
+
+      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE '+
+        '(enabled=1) AND (id=10) AND (first_name=\'Dr.\') AND '+
+        '(last_name LIKE \'%Benton%\') AND '+
+        '(nickname='+dbWrapper.escape('"`\'éàèç')+')';
+
+      expect(select.assemble()).to.equal(expectedSql);
+    });
+
+    it('should handle a "WHERE clause only" SELECT', function() {
+      select = dbWrapper.getSelect()
+        .where('enabled=1')
+        .where( 'id=?', 10 )
+        .where( 'first_name=?', 'Olivier');
+
+      expectedSql = '(enabled=1) AND (id=10) AND (first_name=\'Olivier\')';
+
+      expect(select.assemble()).to.equal(expectedSql);
+    });
+
+    it('should handle DBExpr usage : non-escaped clauses', function() {
+      select = dbWrapper.getSelect()
+        .from('user')
+        .where('DAY(date_created)=?', new DBExpr('DAY( NOW() )') );
+
+      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (DAY(date_created)=DAY( NOW() ))';
+
+      expect(select.assemble()).to.equal(expectedSql);
+    });
+
+    it('should handle a LIMIT simple clause, with 1 param', function() {
+      select = dbWrapper.getSelect()
+        .limit(10)
+        .where('enabled=1')
+        .from('user')
+        .where( 'id=?', 10 );
+
+      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) LIMIT 10';
+
+      expect(select.assemble()).to.equal(expectedSql);
+    });
+
+    it('should handle a LIMIT simple clause, with 2 params', function() {
+      select = dbWrapper.getSelect()
         .limit(10, 30)
         .where('enabled=1')
         .from('user')
         .where( 'id=?', 10 );
-      },
-      
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) LIMIT 30, 10' );
-      }
-      
-    },
 
-    'a ORDER BY simple clause, with 1 param': {
-      topic: function()
-      {
-        return dbWrapper.getSelect()
-          .order('first_name')
-          .limit(10)
+      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) LIMIT 30, 10';
+
+      expect(select.assemble()).to.equal(expectedSql);
+    });
+
+    it('should handle a ORDER BY simple clause, with 1 param', function() {
+      select = dbWrapper.getSelect()
+        .order('first_name')
+        .limit(10)
+        .where('enabled=1')
+        .from('user')
+        .where( 'id=?', 10 );
+
+      var first_name = dbWrapper._adapter.escapeField('first_name');
+      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) ORDER BY '+first_name+' ASC LIMIT 10';
+
+      expect(select.assemble()).to.equal(expectedSql);
+    });
+
+    it('should handle a ORDER BY simple clause, with 2 params', function() {
+      select = dbWrapper.getSelect()
+        .order('first_name', 'DESC')
+        .limit(10)
+        .where('enabled=1')
+        .from('user')
+        .where( 'id=?', 10 );
+
+      var first_name = dbWrapper._adapter.escapeField('first_name');
+      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) ORDER BY '+first_name+' DESC LIMIT 10';
+
+      expect(select.assemble()).to.equal(expectedSql);
+    });
+    
+    describe('with parenthetical grouping', function() {
+  
+      it('should handle an advanced WHERE clause', function() {
+        select = dbWrapper.getSelect()
           .where('enabled=1')
+          .where( 'id=?', 10 )
           .from('user')
-          .where( 'id=?', 10 );
-      },
-      
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user')
-          , first_name = dbWrapper._adapter.escapeField('first_name');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) ORDER BY '+first_name+' ASC LIMIT 10' );
-      }
-      
-    },
-    
-    'a ORDER BY simple clause, with 2 params': {
-      topic: function()
-      {
-        return dbWrapper.getSelect()
-          .order('first_name', 'DESC')
-          .limit(10)
+          .where( 'first_name=?', 'Dr.')
+          .whereGroup()
+          .where( 'last_name LIKE ?', '%Benton%' )
+          .orWhere( 'nickname=?', '"`\'éàèç' );
+  
+        expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND '+
+          '(id=10) AND (first_name=\'Dr.\') AND '+
+          '((last_name LIKE \'%Benton%\') OR (nickname='+dbWrapper.escape('"`\'éàèç')+'))';
+  
+        expect(select.assemble()).to.equal(expectedSql);
+      });
+  
+      it('should handle a more advanced WHERE clause', function() {
+        select = dbWrapper.getSelect()
+          .from('user')
+          .whereGroupClose()      // Erroneous whereGroupClose to be handled
+          .whereGroup(3)   // Multiple group start
           .where('enabled=1')
+          .where( 'id=?', 10 )
+          .whereGroupClose()
+          .where( 'first_name=?', 'Michael')
+          .whereGroup()
+          .where( 'last_name LIKE ?', '%Dwyer%' )
+          .orWhere( 'nickname=?', '"`\'éàèç' )
+          .whereGroupClose(2);
+        // Automatic closing of leftover groups, yeah!
+  
+        expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE ((((enabled=1) AND '+
+          '(id=10)) AND (first_name=\'Michael\') AND '+
+          '((last_name LIKE \'%Dwyer%\') OR '+
+          '(nickname='+dbWrapper.escape('"`\'éàèç')+'))))';
+  
+        expect(select.assemble()).to.equal(expectedSql);
+      });
+  
+      it('should handle an advanced WHERE clause, with compound statements and an array value', function() {
+        select = dbWrapper.getSelect()
           .from('user')
-          .where( 'id=?', 10 );
-      },
+          .whereGroupClose()      // Erroneous whereGroupClose to be handled
+          .whereGroup(3)   // Multiple group start
+          .where('enabled=1')
+          .where( 'id=?', 10 )
+          .whereGroupClose()
+          .where( 'first_name=\'Dr.\' OR first_name IN ?', ['Olivier', 'Mike'])
+          .whereGroup()
+          .where( 'last_name LIKE ?', '%Dwyer%' )
+          .orWhere( 'nickname=?', '"`\'éàèç' )
+          .whereGroupClose(2);
+        // Automatic closing of leftover groups, yeah!
+  
+        expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE ((((enabled=1) AND '+
+          '(id=10)) AND (first_name=\'Dr.\' OR first_name IN (\'Olivier\', \'Mike\')) AND '+
+          '((last_name LIKE \'%Dwyer%\') OR (nickname='+dbWrapper.escape('"`\'éàèç')+'))))';
+  
+        expect(select.assemble()).to.equal(expectedSql);
+      });
       
-      'assembled Select is OK': function( select )
-      {
-        var user = dbWrapper._adapter.escapeTable('user')
-          , first_name = dbWrapper._adapter.escapeField('first_name');
-        assert.equal( select.assemble(), 'SELECT '+user+'.* FROM '+user+' WHERE (enabled=1) AND (id=10) ORDER BY '+first_name+' DESC LIMIT 10' );
-      }
-      
-    }
+    });
     
-  } ).addBatch( {
-    
-    'test suite finished': {
-      topic: [],
-      
-      'callback': function()
-      {
-        //console.log('\n"' + adapterName + '" adapter test suite finished.\n');
-        callback();
-      }
-    }
-    
-  }).run();
+  });
   
 };
 
 
-//--------------------------------------------------- Run test definition
-
-var runTest = function( callback )
-{
-
-  async.forEachSeries( config.testedAdapterNames, adapterTestSuite, function(err){
-     callback && callback( err );
-  });
-
+var runAdapterTestSuiteIfEnabled = function (adapterName) {
+  if (config.testedAdapterNames.indexOf(adapterName) > -1) {
+    adapterTestSuite(adapterName);
+  }
 };
 
-//--------------------------------------------------- Exports
-
-module.exports.runTest = runTest;
+// ------------------------------------------ end test dependencies stuff
 
 
-//--------------------------------------------------- Standalone run
+// ------------------------------------------ begin tests
 
-if( process.argv[1]==__filename )
-{
+describe('SQLite3 adapter', function () {
+  runAdapterTestSuiteIfEnabled('sqlite3');
+});
 
-  runTest( function( err ) {
-   var exitCode = (err) ? 1 : 0 ;
-   setTimeout( function() { process.exit(exitCode); }, 500 );
-  } );
- 
-}  
+describe('"pure JS" MySQL adapter', function () {
+  runAdapterTestSuiteIfEnabled('mysql');
+});
 
+describe('"libmysqlclient" MySQL adapter', function () {
+  // couldn't compile "node-mysql-libmysqlclient" Module at this time... :-/
+  // @see https://github.com/Sannis/node-mysql-libmysqlclient/issues/172
+
+  //runAdapterTestSuiteIfEnabled('mysql-libmysqlclient');
+
+  //TODO: restore this test when the bug is fixed
+});
+
+describe('PgSQL adapter', function () {
+  runAdapterTestSuiteIfEnabled('pg');
+});
+
+// ------------------------------------------ end tests

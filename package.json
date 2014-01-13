@@ -9,9 +9,9 @@
   },
   "authors": [
     "Dr. Benton (http://github.com/DrBenton)",
+    "Michael Dwyer (http://github.com/kalifg)",
     "David Schoen <dave@lyte.id.au>",
-    "Fabian Bornhofen (http://fabianbornhofen.blogspot.com)",
-    "Michael Dwyer (http://github.com/kalifg)"
+    "Fabian Bornhofen (http://fabianbornhofen.blogspot.com)"
   ],
   "main": "dbWrapper.js",
   "directories": {
@@ -20,19 +20,18 @@
   },
   "dependencies": {
     "async": "",
-    "underscore": ""
+    "lodash": "~2.4.1"
   },
   "devDependencies": {
-    "vows": "0.6.x"
-  },
-  "optionalDependencies": {
-    "mysql-libmysqlclient": "1.3.x",
-    "mysql": "0.9.6",
-    "sqlite3": "2.1.x",
-    "pg": "0.8.x"
+    "mocha": "~1.17.0",
+    "chai": "~1.8.1",
+    "mysql-libmysqlclient": "~1.5.2",
+    "mysql": "~2.0.0",
+    "pg": "~2.11.0",
+    "sqlite3": "~2.1.19"
   },
   "scripts": {
-    "test": "node test/all.js"
+    "test": "mocha"
   },
   "keywords": [
     "database",
@@ -46,7 +45,7 @@
     "postgresql"
   ],
   "engines": {
-    "node": ">= 0.4.4 < 0.9.0"
+    "node": ">= 0.4.4"
   },
   "# vim: ts=2 sw=2 et ": null
 }

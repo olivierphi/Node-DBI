@@ -18,7 +18,6 @@ It is also bundled with a __DBSelect__ component, used to build SQL queries in a
 Node-DBI imitates the API of the great Open Source PHP database abstraction layer of the [Zend Framework](http://framework.zend.com/), [Zend_Db](http://framework.zend.com/manual/en/zend.db.html), used by thousands of Web developers for several years.
 
 The example below demonstates the Node-DBI usage:
-(you can also look this [Gist](https://gist.github.com/923149) for the same code with syntax highlighting)
 
 ```javascript
 var DBWrapper = require('node-dbi').DBWrapper; 
@@ -164,18 +163,12 @@ Alternatively, you can install using Node Package Manager (npm):
 
     npm install node-dbi
     
-This is a first version ; all my unit tests run successfully, but it may have bugs. Tell me if you find one ! :-)
+All my unit tests run successfully, but well, it still may have bugs. Tell me if you find one ! :-)
 
 
 ## Dependencies
 
-Thanks to these great modules, which Node-DBI relies on :
-
- * [async](https://github.com/caolan/async)
- * [underscore](https://github.com/grayrest/underscore)
- * [vows](https://github.com/cloudhead/vows) for the unit tests
-
-And of course, these database engines, which makes the really hard work in Node-DBI :
+Node-DBI supports these database engines, which makes the really hard work :
 
  * [mysql](https://github.com/felixge/node-mysql)
  * [mysql-libmysqlclient](https://github.com/Sannis/node-mysql-libmysqlclient)
@@ -188,7 +181,7 @@ Any SQL database engine can theorically be added, with only a quick Adapter writ
 
 To run tests manual DB configuration is required first.
 
-See ```test/config.js``` for databases setup.
+Copy ```test/config.js.dist``` to ```test/config.js```, and edit this JS file for databases setup if needed.
 
 According to Travis CI requirements, MySQL is expected to be available on localhost with user "root", empty password and DB "node_dbi_test".
 

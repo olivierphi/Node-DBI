@@ -5,14 +5,14 @@ var connectionParams = {
     mysql: {
         host:     '127.0.0.1',
         user:     'root',
-        password: 'node-dbi',
+        password: '',
         database: 'node_dbi_test'
     },
 
     pgsql: {
         host:     '127.0.0.1',
         user:     'postgres',
-        password: 'postgres',
+        password: '',
         database: 'node_dbi_test'
     },
 
