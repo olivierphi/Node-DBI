@@ -133,24 +133,39 @@ var adapterTestSuite = function( adapterName )
       expect(select.assemble()).to.equal(expectedSql);
     });
 
-    it('should properly handle "0" params', function() {
-      //@see https://github.com/DrBenton/Node-DBI/issues/19
+    it('should prevent SQL injection', function() {
+      //@see https://github.com/DrBenton/Node-DBI/issues/20
       select = dbWrapper.getSelect()
         .from('user')
-        .where('zero=?', 0)
-        .where('one=?', 1);
+        .where('id=?', '\' OR (SELECT * FROM user WHERE admin=1)');
 
-      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (zero=0) AND (one=1)';
+      var escapedQuote;
+      switch (adapterName) {
+        case 'mysql-libmysqlclient':
+        case 'mysql':
+          escapedQuote = '\\\'';
+          break;
+        case 'sqlite3':
+        case 'pg':
+          escapedQuote = '\'\'';
+          break;
+      }
+      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (id=\''+escapedQuote+' OR (SELECT * FROM user WHERE admin=1)\')';
 
       expect(select.assemble()).to.equal(expectedSql);
     });
 
-    it('should properly handle "null" params (converted to NULL)', function() {
+    it('should properly handle "falsy" params', function() {
+      //@see https://github.com/DrBenton/Node-DBI/issues/19
       select = dbWrapper.getSelect()
         .from('user')
-        .where('name=?', null);
+        .where('blank=?', '')
+        .where('zero=?', 0)
+        .where('undefined=?', undefined)
+        .where('null=?', null)
+        .where('NaN=?', NaN);
 
-      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (name=NULL)';
+      expectedSql = 'SELECT '+user+'.* FROM '+user+' WHERE (blank=\'\') AND (zero=0) AND (undefined=\'\') AND (null=NULL) AND (NaN=\'\')';
 
       expect(select.assemble()).to.equal(expectedSql);
     });

@@ -1,14 +1,14 @@
 {
   "name": "node-dbi",
   "description": "A Database abstraction layer for Node.js, bundled with several DB engines adapters",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "homepage": "https://github.com/DrBenton/Node-DBI",
   "repository": {
     "type": "git",
     "url": "git://github.com/DrBenton/Node-DBI.git"
   },
   "authors": [
-    "Dr. Benton (http://github.com/DrBenton)",
+    "Olivier Philippon (http://github.com/DrBenton)",
     "Michael Dwyer (http://github.com/kalifg)",
     "David Schoen <dave@lyte.id.au>",
     "Fabian Bornhofen (http://fabianbornhofen.blogspot.com)"

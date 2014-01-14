@@ -82,6 +82,8 @@ var select = dbWrapper.getSelect()
 	.where( 'enabled=1' )
 	.where( 'id=?', 10 )
 	.where( 'last_name LIKE ?', '%Foo%' )
+	.where( 'removal_date=?', null ) // null -> NULL
+	.where( 'nickname=?', undefined ) // other falsy-but-not-Numbers values -> empty String
 	.order( 'last_name' )
 	.limit( 10 );
 
