@@ -43,14 +43,14 @@ dbWrapper.fetchRow('SELECT * FROM user WHERE first_name=?', ['John'], function(e
 } );
 
 // ** fetchCol  (if you dont' have values to escape, the 2nd param can be an empty Array or "null")
-dbWrapper.fetchCol('SELECT first_name FROM user ORDER BY fist_name', null, function(err, result) {
+dbWrapper.fetchCol('SELECT first_name FROM user ORDER BY first_name', null, function(err, result) {
 	if( ! err )
 		console.dir(result);
 	// "result" is an Array with all the names of our users, sorted alphabetically
 } );
 
 // ** fetchOne
-dbWrapper.fetchOne('SELECT fist_name FROM user ORDER BY rank DESC LIMIT 1', [], function(err, result) {
+dbWrapper.fetchOne('SELECT first_name FROM user ORDER BY rank DESC LIMIT 1', [], function(err, result) {
 	if( ! err )
 		console.dir(result);
 	// "result" is the first_name of our best user
@@ -64,7 +64,7 @@ dbWrapper.insert('user', JohnData , function(err) {
 	// John has been inserted in our table, with its properties safely escaped
 } );
 
-// ** update  ( here the fist name is used as a raw String, but the last name is safely escaped ) 
+// ** update  ( here the first name is used as a raw String, but the last name is safely escaped ) 
 var JohnDataUpdate = { rank: '1' };
 	dbWrapper.update('user', JohnDataUpdate , [ 'first_name=\'John\'', ['last_name=?', 'Foo'] ], function(err) {
 	// John is now our best user. Congratulations, John !
