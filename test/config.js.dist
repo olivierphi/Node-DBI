@@ -16,6 +16,10 @@ var connectionParams = {
         database: 'node_dbi_test'
     },
 
+    pg_dsn: {
+        dsn: 'postgres://localhost:5432/node_dbi_test'
+    },
+
     sqlite: {
         database: ':memory:'
     }
@@ -37,6 +41,9 @@ module.exports.getDbConfig = function( adapterName )
         case 'pg':
             return connectionParams.pgsql;
 
+        case 'pg_dsn':
+            return connectionParams.pgsql_dsn;
+
         default:
             throw new Error('Unknown Adapter "'+adapterName+'" !');
 
@@ -48,5 +55,6 @@ module.exports.testedAdapterNames = [
     'sqlite3',
     'mysql',
     'mysql-libmysqlclient',
-    'pg'
+    'pg',
+    'pg_dsn'
 ];
