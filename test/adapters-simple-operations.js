@@ -224,10 +224,6 @@ var adapterTestSuite = function (adapterName) {
       });
 
       it('should be able to retrieve the last inserted id', function () {
-        // pg doesn't support getLastInsertId()
-        if (-1 < adapterName.indexOf('pg')) {
-          return;
-        }
         expect(dbWrapper.getLastInsertId()).to.equal(2);
       });
 
