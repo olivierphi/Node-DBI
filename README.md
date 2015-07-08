@@ -26,7 +26,9 @@ var dbConnectionConfig = { host: 'localhost', user: 'test', password: 'test', da
 
 // Replace the adapter name with "mysql", "mysql-libmysqlclient", "sqlite3" or "pg" on the following line :
 dbWrapper = new DBWrapper( '[DB engine adapter name]', dbConnectionConfig );
-dbWrapper.connect();
+dbWrapper.connect(function(err) {
+	if (err) { console.log('Error connecting: ' + err); }
+});
 
 // ** fetchAll
 dbWrapper.fetchAll('SELECT * FROM user', null, function(err, result) {
